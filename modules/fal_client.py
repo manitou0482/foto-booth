@@ -1,29 +1,31 @@
-"""Anbindung an die fal.ai API für FLUX.1 [dev] Image-to-Image.
+"""Anbindung an die fal.ai API für PuLID-FLUX (gesichtserhaltende Generierung).
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
 
-Hinweis: fal.ai bietet für FLUX.1 [schnell] kein Image-to-Image mit
-Prompt+Strength-Steuerung an (nur eine "Redux"-Variante ohne Textprompt und
-ohne Strength-Parameter). Für unseren Anwendungsfall (Gesicht erhalten,
-Pose/Kleidung/Umgebung per Prompt verändern) brauchen wir daher das
-FLUX.1 [dev] Image-to-Image-Modell, das beide Parameter unterstützt.
+Hinweis zur Modellwahl: Klassisches Image-to-Image (FLUX.1 [dev]
+image-to-image mit "strength") wurde getestet und konnte keinen Wert finden,
+der gleichzeitig (a) das Gesicht erkennbar erhält UND (b) die Szene
+vollständig verändert (Dino/Kostüm/Hintergrund) - dasselbe Diffusions-
+"Rauschen", das große Szenenänderungen ermöglicht, verändert zwangsläufig
+auch das Gesicht. PuLID-FLUX (fal-ai/flux-pulid) ist speziell für genau
+dieses Problem gebaut: Es nimmt ein Referenzfoto der Person UND einen
+Text-Prompt entgegen und erzeugt ein komplett neues Bild, in dem die
+Gesichts-Identität separat eingebettet erhalten bleibt (vergleichbar mit
+dem, was Touchpix vermutlich einsetzt).
 """
 import io
 
 import fal_client
 from PIL import Image
 
-# ACHTUNG: fal.ai definiert "strength" umgekehrt zur klassischen
-# Stable-Diffusion-Konvention - laut Doku "controls how much the initial
-# image influences the output". Ein HOHER Wert bedeutet hier also NÄHER am
-# Originalfoto (weniger Veränderung), nicht mehr Veränderung. Damit der
-# Prompt (Dino/Kostüm/Hintergrund) sichtbar greift, aber das Gesicht über
-# das Ausgangsbild trotzdem als Anker dient, brauchen wir einen niedrigeren
-# Wert als ursprünglich angenommen. Bewusst kein UI-Regler - ggf. hier
-# weiter feinjustieren, je nach Testergebnissen.
-IMAGE_STRENGTH = 0.35
-MODEL_ENDPOINT = "fal-ai/flux/dev/image-to-image"
+MODEL_ENDPOINT = "fal-ai/flux-pulid"
+
+# Wie stark die Gesichts-Identität erhalten bleiben soll (0-1, fal.ai-Default
+# ist 1 = maximale Identitätstreue). Bewusst kein UI-Regler dafür.
+ID_WEIGHT = 1.0
+
+NEGATIVE_PROMPT = "blurry, distorted, deformed face, extra limbs, low quality, watermark"
 
 # fal.ai berechnet pro Megapixel des Bildes - wir verkleinern daher vor dem
 # Upload, um Kosten und Verarbeitungszeit vorhersehbar klein zu halten.
@@ -39,19 +41,21 @@ def _resize_for_upload(image_bytes: bytes) -> bytes:
 
 
 def generate_image(image_bytes: bytes, prompt: str) -> str:
-    """Lädt das Gästefoto zu fal.ai hoch und lässt es per FLUX.1 [dev]
-    img2img transformieren. Gibt die URL des Ergebnisbilds zurück."""
+    """Lädt das Gästefoto zu fal.ai hoch und lässt PuLID-FLUX daraus ein
+    neues, themenpassendes Bild erzeugen, das die Gesichts-Identität
+    erhält. Gibt die URL des Ergebnisbilds zurück."""
     resized_bytes = _resize_for_upload(image_bytes)
-    image_url = fal_client.upload(resized_bytes, "image/jpeg")
+    reference_image_url = fal_client.upload(resized_bytes, "image/jpeg")
 
     result = fal_client.run(
         MODEL_ENDPOINT,
         arguments={
-            "image_url": image_url,
             "prompt": prompt,
-            "strength": IMAGE_STRENGTH,
-            "num_inference_steps": 16,
-            "enable_safety_checker": True,
+            "reference_image_url": reference_image_url,
+            "id_weight": ID_WEIGHT,
+            "negative_prompt": NEGATIVE_PROMPT,
+            "guidance_scale": 4,
+            "num_inference_steps": 20,
         },
     )
     return result["images"][0]["url"]
