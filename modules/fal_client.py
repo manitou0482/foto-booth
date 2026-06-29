@@ -19,6 +19,7 @@ Hinweis zur Modellwahl (empirisch getestet, siehe Konversation):
   Das ist der aktuell verwendete Endpoint.
 """
 import io
+import random
 
 import fal_client
 from PIL import Image
@@ -27,6 +28,25 @@ MODEL_ENDPOINT = "fal-ai/flux-pro/kontext"
 PERSON_DETECTION_ENDPOINT = "fal-ai/moondream2/object-detection"
 
 GUIDANCE_SCALE = 3.5
+
+# Themen-Prompts können den Platzhalter {ACTION} enthalten, der bei jeder
+# Generierung durch eine zufällig gewählte Aktion ersetzt wird - damit nicht
+# immer dieselbe Pose/Geste entsteht (z.B. "winkt immer" beim Dino-Thema).
+ACTION_VARIANTS = [
+    "laughing and waving directly at the camera",
+    "shouting triumphantly with one fist raised in the air",
+    "pointing excitedly ahead",
+    "holding on tight while looking back over their shoulder with a thrilled grin",
+    "cheering with both arms raised in excitement",
+    "gasping in playful surprise with wide eyes and an open-mouthed smile",
+    "giving a confident thumbs up",
+]
+
+
+def _randomize_action(prompt: str) -> str:
+    if "{ACTION}" in prompt:
+        return prompt.replace("{ACTION}", random.choice(ACTION_VARIANTS))
+    return prompt
 
 # fal.ai verarbeitet das Bild ohnehin in moderater Auflösung - Verkleinerung
 # vor dem Upload spart Bandbreite/Zeit (Kontext kostet pauschal $0.04/Bild,
@@ -86,6 +106,7 @@ def generate_image(image_bytes: bytes, prompt: str) -> str:
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
 
     num_people = _detect_num_people(image_url)
+    prompt = _randomize_action(prompt)
 
     result = fal_client.run(
         MODEL_ENDPOINT,

@@ -14,6 +14,32 @@ from modules import camera_view, display_view
 
 st.set_page_config(page_title="KI-Fotobox", page_icon="📸", layout="wide")
 
+# PRELIGN-CI: Dunkelviolett (#2A1538) + Gold (#D4B05A), abgerundete Formen.
+st.markdown(
+    """
+    <style>
+    div.stButton > button {
+        border-radius: 28px;
+        border: 1px solid rgba(212, 176, 90, 0.4);
+    }
+    div.stButton > button[kind="primary"] {
+        background-color: #D4B05A;
+        color: #2A1538;
+        border: none;
+        font-weight: 600;
+    }
+    div.stButton > button[kind="primary"]:hover {
+        background-color: #C9A84D;
+        color: #2A1538;
+    }
+    img {
+        border-radius: 20px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # fal_client liest den Key automatisch aus der Umgebungsvariable FAL_KEY.
 if "FAL_KEY" in st.secrets:
     os.environ["FAL_KEY"] = st.secrets["FAL_KEY"]

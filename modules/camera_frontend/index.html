@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin:0; padding:0; background:transparent; font-family: sans-serif; }
+  #video { width:100%; max-height:420px; object-fit:cover; border-radius:20px; background:#000; display:block; }
+  #status { font-size:0.75rem; color:#9b8aa8; padding:6px 0; text-align:center; }
+</style>
+</head>
+<body>
+  <video id="video" autoplay muted playsinline></video>
+  <div id="status">Kamera wird initialisiert...</div>
+  <canvas id="canvas" style="display:none;"></canvas>
+<script>
+(function () {
+    const videoEl = document.getElementById('video');
+    const canvasEl = document.getElementById('canvas');
+    const statusEl = document.getElementById('status');
+
+    let currentStream = null;
+    let lastProcessedToken = null;
+
+    function setStatus(msg) { statusEl.textContent = msg; }
+
+    function sendValue(photoBase64) {
+        window.parent.postMessage({
+            isStreamlitMessage: true,
+            type: 'streamlit:setComponentValue',
+            value: photoBase64,
+            dataType: 'json'
+        }, '*');
+    }
+
+    function setFrameHeight() {
+        window.parent.postMessage({
+            isStreamlitMessage: true,
+            type: 'streamlit:setFrameHeight',
+            height: 440
+        }, '*');
+    }
+
+    async function openStream() {
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' },
+                audio: false,
+            });
+            videoEl.srcObject = currentStream;
+            setStatus('Kamera aktiv.');
+        } catch (e) {
+            setStatus('Kamera-Fehler: ' + e.message);
+        }
+    }
+
+    function capturePhoto() {
+        const w = videoEl.videoWidth;
+        const h = videoEl.videoHeight;
+        if (!w || !h) {
+            setStatus('Video noch nicht bereit, Aufnahme übersprungen.');
+            return;
+        }
+        canvasEl.width = w;
+        canvasEl.height = h;
+        canvasEl.getContext('2d').drawImage(videoEl, 0, 0, w, h);
+        const dataUrl = canvasEl.toDataURL('image/jpeg', 0.85);
+        const base64 = dataUrl.split(',')[1];
+        setStatus('📸 Foto aufgenommen!');
+        sendValue(base64);
+    }
+
+    async function handleRender(args) {
+        const triggerToken = args.trigger_token || '';
+
+        if (!currentStream) {
+            await openStream();
+        }
+
+        if (triggerToken && triggerToken !== 'none' && triggerToken !== lastProcessedToken) {
+            lastProcessedToken = triggerToken;
+            capturePhoto();
+        }
+    }
+
+    window.addEventListener('message', function (event) {
+        const data = event.data;
+        if (!data || data.type !== 'streamlit:render') return;
+        handleRender(data.args || {});
+    });
+
+    window.parent.postMessage({ isStreamlitMessage: true, type: 'streamlit:componentReady', apiVersion: 1 }, '*');
+    setFrameHeight();
+})();
+</script>
+</body>
+</html>

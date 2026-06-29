@@ -1,8 +1,11 @@
 """Kamera-Ansicht: Modus 1 (All-in-One) und Modus 2 Rolle 'camera'."""
+import base64
+import time
+
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
-from modules import ui_components, fal_client
+from modules import ui_components, fal_client, camera_component
 
 
 def render(state, themes, all_in_one: bool):
@@ -18,34 +21,47 @@ def _start_theme(state, theme_id):
 
 
 def _run_capture_flow(state, themes, waiting_message: str):
-    """Gemeinsamer Ablauf für countdown -> capture -> processing -> result,
-    wird sowohl im All-in-One- als auch im Kamera-Rollen-Modus genutzt."""
+    """Gemeinsamer Ablauf für Bereit-Bestätigung -> Countdown -> Aufnahme ->
+    KI-Verarbeitung -> Ergebnis. Wird sowohl im All-in-One- als auch im
+    Kamera-Rollen-Modus genutzt."""
     if state.phase == "idle":
         st.info(waiting_message)
 
     elif state.phase == "theme_selected":
+        st.markdown(
+            "<h2 style='text-align:center;'>📸 Alle bereit?</h2>"
+            "<p style='text-align:center;'>Stellt euch in Position - dann auf den Button tippen.</p>",
+            unsafe_allow_html=True,
+        )
+        if st.button("✅ Jetzt Foto machen!", use_container_width=True, type="primary"):
+            state.phase = "countdown"
+            st.rerun()
+
+    elif state.phase == "countdown":
         ui_components.render_countdown(3)
+        state.capture_token = str(time.time())
         state.phase = "captured_ready"
         st.rerun()
 
     elif state.phase == "captured_ready":
-        st.info("📸 Aufnahme läuft automatisch...")
-        photo = st.camera_input("Kamera", label_visibility="collapsed")
-        ui_components.render_auto_capture_trigger()
-        if photo is not None:
-            state.captured_image_bytes = photo.getvalue()
+        photo_base64 = camera_component.camera_widget(trigger_token=state.capture_token, key="booth_camera")
+        if photo_base64:
+            state.captured_image_bytes = base64.b64decode(photo_base64)
             state.phase = "processing"
             st.rerun()
 
     elif state.phase == "processing":
-        with st.spinner("✨ Die KI verwandelt euer Foto... (kann ein paar Sekunden dauern)"):
-            theme = next(t for t in themes if t["id"] == state.theme_id)
-            try:
-                url = fal_client.generate_image(state.captured_image_bytes, theme["prompt"])
-                state.result_image_url = url
-            except Exception as e:
-                state.error = str(e)
-            state.phase = "result"
+        placeholder = st.empty()
+        with placeholder:
+            ui_components.render_loading_spinner()
+        theme = next(t for t in themes if t["id"] == state.theme_id)
+        try:
+            url = fal_client.generate_image(state.captured_image_bytes, theme["prompt"])
+            state.result_image_url = url
+        except Exception as e:
+            state.error = str(e)
+        placeholder.empty()
+        state.phase = "result"
         st.rerun()
 
     elif state.phase == "result":
@@ -72,10 +88,10 @@ def _render_camera_role(state, themes):
     st.title("📷 Kamera-Station")
 
     # Nur im Leerlauf pollen: Sobald ein Thema gewählt wurde, treibt sich der
-    # Ablauf über die eigenen st.rerun()-Aufrufe selbst voran (Countdown,
-    # KI-Verarbeitung). Würde hier weiterhin alle 1,5s automatisch neu
-    # geladen, würde das den mehrere Sekunden dauernden Countdown immer
-    # wieder mitten im Lauf abbrechen und neu starten.
+    # Ablauf über die eigenen st.rerun()-Aufrufe selbst voran (Bereit-Check,
+    # Countdown, KI-Verarbeitung). Würde hier weiterhin alle 1,5s automatisch
+    # neu geladen, würde das mehrsekündige Abläufe immer wieder mitten im
+    # Lauf abbrechen und neu starten.
     if state.phase == "idle":
         st_autorefresh(interval=1500, key="camera_poll")
 
