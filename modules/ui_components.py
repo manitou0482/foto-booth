@@ -61,30 +61,46 @@ def render_auto_capture_trigger():
     """
     st.components.v1.html(
         """
+        <div id="autocap-status" style="font-family:sans-serif; font-size:0.8rem; color:#888;"></div>
         <script>
         (function() {
+            const statusEl = document.getElementById('autocap-status');
+            function setStatus(msg) { if (statusEl) { statusEl.textContent = msg; } }
+
             const candidates = ['take photo', 'take a photo', 'capture', 'foto aufnehmen', 'aufnehmen'];
             let attempts = 0;
             const maxAttempts = 100; // ca. 20s bei 200ms Intervall
+
             const interval = setInterval(function() {
                 attempts++;
-                const buttons = window.parent.document.querySelectorAll('button');
-                for (const btn of buttons) {
-                    const label = ((btn.innerText || '') + ' ' + (btn.getAttribute('aria-label') || '') + ' ' + (btn.title || ''))
-                        .trim()
-                        .toLowerCase();
-                    if (candidates.some(function(c) { return label.includes(c); })) {
-                        btn.click();
-                        clearInterval(interval);
-                        return;
+                try {
+                    const buttons = window.parent.document.querySelectorAll('button');
+                    setStatus('Suche Auslöser... (Versuch ' + attempts + ', ' + buttons.length + ' Buttons gefunden)');
+                    for (const btn of buttons) {
+                        const label = ((btn.innerText || '') + ' ' + (btn.getAttribute('aria-label') || '') + ' ' + (btn.title || ''))
+                            .trim()
+                            .toLowerCase();
+                        if (candidates.some(function(c) { return label.includes(c); })) {
+                            btn.click();
+                            setStatus('Auslöser gefunden und geklickt!');
+                            clearInterval(interval);
+                            return;
+                        }
                     }
+                } catch (e) {
+                    setStatus('Fehler beim Zugriff auf die Seite: ' + e.message);
+                    clearInterval(interval);
+                    return;
                 }
-                if (attempts >= maxAttempts) { clearInterval(interval); }
+                if (attempts >= maxAttempts) {
+                    setStatus('Auslöser nach ' + maxAttempts + ' Versuchen nicht gefunden.');
+                    clearInterval(interval);
+                }
             }, 200);
         })();
         </script>
         """,
-        height=0,
+        height=30,
     )
 
 
