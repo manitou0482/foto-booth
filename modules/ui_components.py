@@ -26,6 +26,7 @@ def render_theme_picker(themes, on_select):
             with col:
                 if st.button(theme["label"], key=f"theme_{theme['id']}", use_container_width=True):
                     on_select(theme["id"])
+                    st.rerun()
 
 
 def render_countdown(seconds: int = 3):
@@ -62,13 +63,17 @@ def render_auto_capture_trigger():
         """
         <script>
         (function() {
+            const candidates = ['take photo', 'take a photo', 'capture', 'foto aufnehmen', 'aufnehmen'];
             let attempts = 0;
-            const maxAttempts = 50; // ca. 10s bei 200ms Intervall
+            const maxAttempts = 100; // ca. 20s bei 200ms Intervall
             const interval = setInterval(function() {
                 attempts++;
                 const buttons = window.parent.document.querySelectorAll('button');
                 for (const btn of buttons) {
-                    if (btn.innerText && btn.innerText.trim() === 'Take Photo') {
+                    const label = ((btn.innerText || '') + ' ' + (btn.getAttribute('aria-label') || '') + ' ' + (btn.title || ''))
+                        .trim()
+                        .toLowerCase();
+                    if (candidates.some(function(c) { return label.includes(c); })) {
                         btn.click();
                         clearInterval(interval);
                         return;
