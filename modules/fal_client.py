@@ -24,6 +24,7 @@ import fal_client
 from PIL import Image
 
 MODEL_ENDPOINT = "fal-ai/flux-pro/kontext"
+PERSON_DETECTION_ENDPOINT = "fal-ai/moondream2/object-detection"
 
 GUIDANCE_SCALE = 3.5
 
@@ -41,28 +42,50 @@ def _resize_for_upload(image_bytes: bytes) -> bytes:
     return buf.getvalue()
 
 
+def _detect_num_people(image_url: str) -> int:
+    """Erkennt automatisch, wie viele Personen auf dem Foto sind (Moondream2
+    Objekterkennung, ~$0.02/Bild). Bei Fehlern wird konservativ 1 Person
+    angenommen, damit die Generierung trotzdem weiterläuft."""
+    try:
+        result = fal_client.run(
+            PERSON_DETECTION_ENDPOINT,
+            arguments={"image_url": image_url, "object": "person"},
+        )
+        count = len(result.get("objects", []))
+        return max(count, 1)
+    except Exception:
+        return 1
+
+
 def _build_prompt(prompt: str, num_people: int) -> str:
     """Themen-Prompts sind teils in Einzahl ("the person"), teils in Mehrzahl
-    ("the people") formuliert. Empirisch getestet: Kontext richtet sich nach
-    dieser Formulierung und lässt bei Einzahl-Wortlaut weitere Personen aus
-    dem Originalfoto einfach weg. Ein generischer, vorangestellter Hinweis
-    korrigiert das unabhängig vom jeweiligen Theme-Text - funktioniert für
-    alle 20 Themen gleich, ohne dass die Prompts selbst angepasst werden
-    müssen."""
+    ("the people") formuliert - unabhängig von der tatsächlichen Personenzahl
+    im Foto. Empirisch getestet: Kontext richtet sich nach der Formulierung
+    im Theme-Text, nicht zuverlässig nach dem Originalfoto. Ein generischer,
+    vorangestellter Hinweis korrigiert das in beide Richtungen (verhindert
+    Klon-Duplikate bei Einzelfotos UND fehlende Personen bei Gruppenfotos) -
+    funktioniert für alle 20 Themen gleich, ohne dass die Prompts selbst
+    angepasst werden müssen."""
     if num_people <= 1:
-        return prompt
+        return (
+            "There is exactly 1 person in the reference photo. Show only that ONE "
+            "person in the new image - do not duplicate them or add extra people. " + prompt
+        )
     return (
         f"There are {num_people} people in the reference photo. Include ALL of them "
         f"in the new image, each keeping their own distinct face and identity. " + prompt
     )
 
 
-def generate_image(image_bytes: bytes, prompt: str, num_people: int = 1) -> str:
-    """Lädt das Gästefoto zu fal.ai hoch und lässt FLUX.1 Kontext daraus ein
-    neues, themenpassendes Bild erzeugen, das alle Gesichter aus dem Foto
-    erhält. Gibt die URL des Ergebnisbilds zurück."""
+def generate_image(image_bytes: bytes, prompt: str) -> str:
+    """Lädt das Gästefoto zu fal.ai hoch, erkennt automatisch die Anzahl der
+    Personen im Foto und lässt FLUX.1 Kontext daraus ein neues,
+    themenpassendes Bild erzeugen, das alle erkannten Gesichter erhält.
+    Gibt die URL des Ergebnisbilds zurück."""
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
+
+    num_people = _detect_num_people(image_url)
 
     result = fal_client.run(
         MODEL_ENDPOINT,
