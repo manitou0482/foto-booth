@@ -61,7 +61,17 @@
             });
             videoEl.srcObject = currentStream;
             currentFacingMode = facingMode;
-            setStatus('Kamera aktiv.');
+
+            const track = currentStream.getVideoTracks()[0];
+            const settings = track ? track.getSettings() : {};
+            const label = track ? track.label : '';
+            const actualFacing = settings.facingMode || 'unbekannt';
+            const requestedMatchesActual = actualFacing === facingMode;
+            setStatus(
+                'Kamera aktiv: ' + (label || 'unbenannt') +
+                ' (erkannt als "' + actualFacing + '"' +
+                (requestedMatchesActual ? ', wie gewünscht' : ', NICHT die gewünschte Kamera!') + ')'
+            );
         } catch (e) {
             setStatus('Kamera-Fehler: ' + e.message);
         }
