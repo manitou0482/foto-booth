@@ -30,23 +30,149 @@ PERSON_DETECTION_ENDPOINT = "fal-ai/moondream2/object-detection"
 GUIDANCE_SCALE = 3.5
 
 # Themen-Prompts können den Platzhalter {ACTION} enthalten, der bei jeder
-# Generierung durch eine zufällig gewählte Aktion ersetzt wird - damit nicht
-# immer dieselbe Pose/Geste entsteht (z.B. "winkt immer" beim Dino-Thema).
-ACTION_VARIANTS = [
-    "laughing and waving directly at the camera",
-    "shouting triumphantly with one fist raised in the air",
-    "pointing excitedly ahead",
-    "holding on tight while looking back over their shoulder with a thrilled grin",
-    "cheering with both arms raised in excitement",
-    "gasping in playful surprise with wide eyes and an open-mouthed smile",
-    "giving a confident thumbs up",
-]
+# Generierung durch eine zufällig gewählte, zum Thema passende Pose/Aktion
+# ersetzt wird - damit nicht immer dieselbe Geste/Haltung entsteht (z.B.
+# "winkt immer" beim Dino-Thema, "steht immer nur" beim Piraten-Thema).
+# Pop-Art-Comic und Anime-Hero haben bewusst KEINEN Pool, da sie laut
+# eigenem Prompt-Text die Original-Pose/den Original-Ausdruck 1:1 erhalten
+# sollen (Stil-Transfer statt Pose-Änderung).
+ACTION_POOLS = {
+    "dino_ritt": [
+        "laughing and waving directly at the camera",
+        "shouting triumphantly with one fist raised in the air",
+        "pointing excitedly ahead",
+        "holding on tight while looking back over their shoulder with a thrilled grin",
+        "cheering with both arms raised in excitement",
+        "gasping in playful surprise with wide eyes and an open-mouthed smile",
+        "giving a confident thumbs up",
+    ],
+    "astronaut": [
+        "waving joyfully at the camera",
+        "giving an excited thumbs up while floating",
+        "reaching playfully toward the Earth reflection in the visor",
+        "laughing while floating weightlessly with arms spread wide",
+        "doing a playful zero-gravity somersault",
+    ],
+    "cyberpunk": [
+        "standing confidently and looking straight at the camera",
+        "leaning back against a neon-lit wall with arms crossed",
+        "walking forward with a determined stride",
+        "looking back over one shoulder with a sharp smirk",
+        "adjusting their jacket collar confidently",
+    ],
+    "medieval_knight": [
+        "facing the camera with a confident, proud smile",
+        "kneeling with their sword planted in the ground",
+        "raising their sword triumphantly overhead",
+        "standing guard with a shield raised",
+        "saluting with a fist over their chest",
+    ],
+    "pirate_captain": [
+        "grinning confidently directly at the camera, wind blowing through their hair",
+        "hanging playfully from the ship's rigging",
+        "fighting boldly at the ship's cannon",
+        "standing with one boot triumphantly on a treasure chest",
+        "raising a cutlass triumphantly on the deck",
+    ],
+    "wild_west_sheriff": [
+        "standing confidently with a determined expression",
+        "drawing their revolver in a quick-draw stance",
+        "leaning casually against a saloon post",
+        "tipping their hat with a sly smirk",
+        "standing in a tense duel-ready stance",
+    ],
+    "viking_warrior": [
+        "standing powerful and proud, looking directly at the camera",
+        "raising a battle axe triumphantly overhead",
+        "letting out a fierce battle cry",
+        "blowing a war horn",
+        "kneeling and planting their axe into the ground",
+    ],
+    "superhero": [
+        "standing in a heroic pose, looking confidently at the camera",
+        "flying forward with their cape billowing behind them",
+        "landing in a dramatic heroic crouch",
+        "punching the air triumphantly",
+        "standing protectively with arms crossed",
+    ],
+    "mermaid_underwater": [
+        "expression joyful and serene, looking toward the camera",
+        "twirling gracefully through the water",
+        "reaching playfully toward a school of colorful fish",
+        "resting elegantly on a coral reef",
+        "swimming gracefully upward toward the light above",
+    ],
+    "renaissance_royalty": [
+        "sitting with regal, composed posture, looking elegantly at the camera",
+        "raising a golden goblet in an elegant toast",
+        "gesturing gracefully with one hand",
+        "standing regally beside an ornate throne",
+        "looking thoughtfully out of a tall palace window",
+    ],
+    "gatsby_1920s": [
+        "posing confidently with a charming smile",
+        "dancing playfully with a glass of champagne in hand",
+        "laughing joyfully amid drifting confetti",
+        "leaning charismatically against a grand piano",
+        "striking a glamorous pose amid the party",
+    ],
+    "safari_adventure": [
+        "looking excited and adventurous directly at the camera",
+        "pointing excitedly toward distant wildlife",
+        "crouching low while observing through binoculars",
+        "climbing triumphantly onto a fallen log",
+        "laughing while holding a field journal",
+    ],
+    "winter_wonderland_santa": [
+        "smiling warmly and waving at the camera",
+        "laughing while holding a beautifully wrapped gift",
+        "sitting cozily beside a decorated Christmas tree",
+        "throwing a playful snowball",
+        "hugging a wrapped present joyfully",
+    ],
+    "tropical_beach_paradise": [
+        "smiling happily directly at the camera",
+        "relaxing playfully in a beachside hammock",
+        "splashing joyfully in the shallow turquoise water",
+        "walking barefoot along the shoreline",
+        "raising a tropical cocktail cheerfully",
+    ],
+    "disco_70s": [
+        "striking a confident, fun dance pose",
+        "spinning playfully under the glowing disco lights",
+        "pointing confidently toward the sky mid-dance",
+        "laughing joyfully amid the dance floor lights",
+        "striking a glamorous disco pose with arms raised",
+    ],
+    "scifi_mech_pilot": [
+        "looking determined and confident directly at the camera",
+        "giving a confident thumbs up from the cockpit",
+        "operating the holographic controls intently",
+        "saluting confidently before launch",
+        "leaning out of the cockpit with a determined grin",
+    ],
+    "fairy_tale_forest": [
+        "smiling softly, looking gently enchanted toward the camera",
+        "twirling playfully amid floating magical lights",
+        "reaching out gently toward a glowing firefly",
+        "sitting peacefully upon a mossy log",
+        "dancing gracefully among the ancient trees",
+    ],
+    "egyptian_pharaoh": [
+        "holding a regal, powerful pose, looking directly at the camera",
+        "raising a golden staff triumphantly",
+        "sitting regally upon an ornate throne",
+        "gesturing commandingly with one outstretched arm",
+        "standing proudly between towering temple columns",
+    ],
+}
 
 
-def _randomize_action(prompt: str) -> str:
-    if "{ACTION}" in prompt:
-        return prompt.replace("{ACTION}", random.choice(ACTION_VARIANTS))
-    return prompt
+def _randomize_action(theme_id: str, prompt: str) -> str:
+    if "{ACTION}" not in prompt:
+        return prompt
+    pool = ACTION_POOLS.get(theme_id, ["standing confidently, looking directly at the camera"])
+    return prompt.replace("{ACTION}", random.choice(pool))
 
 # fal.ai verarbeitet das Bild ohnehin in moderater Auflösung - Verkleinerung
 # vor dem Upload spart Bandbreite/Zeit (Kontext kostet pauschal $0.04/Bild,
@@ -90,20 +216,30 @@ def _build_prompt(prompt: str, num_people: int) -> str:
     müssen."""
     if num_people <= 1:
         prompt = prompt.replace("The people from the photo", "The person from the photo")
-        prefix = (
+        count_clause = (
             "There is exactly 1 person in the reference photo. Show only that ONE "
             "person in the new image - do not duplicate them or add extra people. "
         )
     else:
         prompt = prompt.replace("The person from the photo", "The people from the photo")
-        prefix = (
+        count_clause = (
             f"There are {num_people} people in the reference photo. Include ALL of them "
             f"in the new image, each keeping their own distinct face and identity. "
         )
-    return prefix + prompt
+
+    # Identität hat oberste Priorität, Kleidung soll zum jeweiligen Geschlecht
+    # passen statt einer festen (oft männlich wirkenden) Standardvariante.
+    identity_clause = (
+        "Keep the exact facial identity, face shape, skin tone, and features of each "
+        "person from the reference photo completely unchanged - only change their pose, "
+        "clothing, and the background as described below. Style all clothing and "
+        "costume details to naturally match each person's own apparent gender "
+        "presentation from the reference photo. "
+    )
+    return identity_clause + count_clause + prompt
 
 
-def generate_image(image_bytes: bytes, prompt: str) -> str:
+def generate_image(image_bytes: bytes, prompt: str, theme_id: str) -> str:
     """Lädt das Gästefoto zu fal.ai hoch, erkennt automatisch die Anzahl der
     Personen im Foto und lässt FLUX.1 Kontext daraus ein neues,
     themenpassendes Bild erzeugen, das alle erkannten Gesichter erhält.
@@ -112,7 +248,7 @@ def generate_image(image_bytes: bytes, prompt: str) -> str:
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
 
     num_people = _detect_num_people(image_url)
-    prompt = _randomize_action(prompt)
+    prompt = _randomize_action(theme_id, prompt)
 
     result = fal_client.run(
         MODEL_ENDPOINT,
