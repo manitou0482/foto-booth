@@ -69,7 +69,7 @@ admin_settings.camera_facing = "environment" if camera_label == "Rückkamera" el
 quality_label = st.sidebar.radio(
     "Bildqualität",
     ["Schnell (Party)", "Hohe Qualität (Pro)"],
-    index=0 if admin_settings.scene_quality == "dev" else 1,
+    index=0 if getattr(admin_settings, "scene_quality", "dev") == "dev" else 1,
 )
 admin_settings.scene_quality = "dev" if quality_label == "Schnell (Party)" else "pro"
 
