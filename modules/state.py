@@ -14,6 +14,7 @@ import threading
 class BoothState:
     phase: str = "idle"  # idle -> theme_selected -> countdown -> captured_ready -> processing -> result
     theme_id: str | None = None
+    capture_request_id: str = "none"
     captured_image_bytes: bytes | None = None
     result_image_url: str | None = None
     error: str | None = None
@@ -23,9 +24,24 @@ class BoothState:
         with self.lock:
             self.phase = "idle"
             self.theme_id = None
+            self.capture_request_id = "none"
             self.captured_image_bytes = None
             self.result_image_url = None
             self.error = None
+
+
+@dataclass
+class AdminSettings:
+    """Globale Admin-Einstellungen - gelten für alle Sessions/Geräte gleich,
+    unabhängig von Modus 1/2, da sich die physische Kamera-Hardware nicht
+    pro Gast ändert."""
+    preferred_camera_label: str | None = None
+    available_devices: list = field(default_factory=list)
+
+
+@st.cache_resource
+def get_admin_settings() -> AdminSettings:
+    return AdminSettings()
 
 
 @st.cache_resource

@@ -8,7 +8,7 @@ import os
 
 import streamlit as st
 
-from modules.state import get_shared_state, get_session_state
+from modules.state import get_shared_state, get_session_state, get_admin_settings
 from modules.ui_components import load_themes
 from modules import camera_view, display_view
 
@@ -25,6 +25,7 @@ else:
     st.stop()
 
 themes = load_themes()
+admin_settings = get_admin_settings()
 
 st.sidebar.title("⚙️ Admin")
 mode = st.sidebar.radio(
@@ -32,9 +33,22 @@ mode = st.sidebar.radio(
     ["Modus 1: All-in-One", "Modus 2: Zwei-Geräte-Station"],
 )
 
+st.sidebar.subheader("📷 Kamera-Einstellung")
+device_labels = [d["label"] or f"Kamera {i + 1}" for i, d in enumerate(admin_settings.available_devices)]
+camera_options = ["(Automatisch)"] + device_labels
+current_index = (
+    camera_options.index(admin_settings.preferred_camera_label)
+    if admin_settings.preferred_camera_label in camera_options
+    else 0
+)
+camera_choice = st.sidebar.selectbox("Feste Kamera für die Box", camera_options, index=current_index)
+admin_settings.preferred_camera_label = None if camera_choice == "(Automatisch)" else camera_choice
+if not admin_settings.available_devices:
+    st.sidebar.caption("Liste erscheint, sobald die Kamera einmal aktiviert wurde.")
+
 if mode.startswith("Modus 1"):
     state = get_session_state()
-    camera_view.render(state, themes, all_in_one=True)
+    camera_view.render(state, themes, admin_settings, all_in_one=True)
 
 else:
     state = get_shared_state()
@@ -55,6 +69,6 @@ else:
         st.stop()
 
     elif role == "camera":
-        camera_view.render(state, themes, all_in_one=False)
+        camera_view.render(state, themes, admin_settings, all_in_one=False)
     else:
         display_view.render(state, themes)
