@@ -80,21 +80,27 @@ def _detect_num_people(image_url: str) -> int:
 def _build_prompt(prompt: str, num_people: int) -> str:
     """Themen-Prompts sind teils in Einzahl ("the person"), teils in Mehrzahl
     ("the people") formuliert - unabhängig von der tatsächlichen Personenzahl
-    im Foto. Empirisch getestet: Kontext richtet sich nach der Formulierung
-    im Theme-Text, nicht zuverlässig nach dem Originalfoto. Ein generischer,
-    vorangestellter Hinweis korrigiert das in beide Richtungen (verhindert
-    Klon-Duplikate bei Einzelfotos UND fehlende Personen bei Gruppenfotos) -
-    funktioniert für alle 20 Themen gleich, ohne dass die Prompts selbst
-    angepasst werden müssen."""
+    im Foto. Ein vorangestellter Hinweissatz allein reicht nicht immer aus:
+    bei Themen mit enger, auf eine Person zugeschnittener Bildsprache (z.B.
+    Ritter-Porträt, Astronaut-Helm-Closeup) hält sich Kontext eher an die
+    Formulierung im eigentlichen Theme-Text als an den Zusatzsatz. Deshalb
+    wird die Einzahl/Mehrzahl-Formulierung jetzt direkt im Prompt-Text selbst
+    ausgetauscht (zusätzlich zum Hinweissatz) - funktioniert für alle 20
+    Themen gleich, ohne dass die Prompts selbst manuell angepasst werden
+    müssen."""
     if num_people <= 1:
-        return (
+        prompt = prompt.replace("The people from the photo", "The person from the photo")
+        prefix = (
             "There is exactly 1 person in the reference photo. Show only that ONE "
-            "person in the new image - do not duplicate them or add extra people. " + prompt
+            "person in the new image - do not duplicate them or add extra people. "
         )
-    return (
-        f"There are {num_people} people in the reference photo. Include ALL of them "
-        f"in the new image, each keeping their own distinct face and identity. " + prompt
-    )
+    else:
+        prompt = prompt.replace("The person from the photo", "The people from the photo")
+        prefix = (
+            f"There are {num_people} people in the reference photo. Include ALL of them "
+            f"in the new image, each keeping their own distinct face and identity. "
+        )
+    return prefix + prompt
 
 
 def generate_image(image_bytes: bytes, prompt: str) -> str:
