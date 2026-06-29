@@ -14,9 +14,15 @@ import io
 import fal_client
 from PIL import Image
 
-# Fest auf 0.75 eingestellt: Gesichter bleiben originalgetreu, während
-# Pose/Kleidung/Umgebung stark "morphen". Bewusst kein UI-Regler dafür.
-IMAGE_STRENGTH = 0.75
+# ACHTUNG: fal.ai definiert "strength" umgekehrt zur klassischen
+# Stable-Diffusion-Konvention - laut Doku "controls how much the initial
+# image influences the output". Ein HOHER Wert bedeutet hier also NÄHER am
+# Originalfoto (weniger Veränderung), nicht mehr Veränderung. Damit der
+# Prompt (Dino/Kostüm/Hintergrund) sichtbar greift, aber das Gesicht über
+# das Ausgangsbild trotzdem als Anker dient, brauchen wir einen niedrigeren
+# Wert als ursprünglich angenommen. Bewusst kein UI-Regler - ggf. hier
+# weiter feinjustieren, je nach Testergebnissen.
+IMAGE_STRENGTH = 0.35
 MODEL_ENDPOINT = "fal-ai/flux/dev/image-to-image"
 
 # fal.ai berechnet pro Megapixel des Bildes - wir verkleinern daher vor dem
