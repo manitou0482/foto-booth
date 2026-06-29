@@ -86,12 +86,18 @@ def make_qr_png(url: str) -> bytes:
     return buf.getvalue()
 
 
-def render_result(result_url: str):
-    """Zeigt das Ergebnisbild + QR-Code + Druck-Button + Teilen-Buttons."""
+def render_result(result_url: str, input_image_bytes: bytes | None = None):
+    """Zeigt das Ergebnisbild + QR-Code + Druck-Button + Teilen-Buttons.
+    input_image_bytes (optional): die Original-Aufnahme zum direkten
+    Vergleich - hilfreich zur Fehlersuche, falls das Ergebnis nicht wie
+    erwartet aussieht."""
     col1, col2 = st.columns([2, 1])
 
     with col1:
         st.image(result_url, caption="Dein Foto", use_container_width=True)
+        if input_image_bytes:
+            with st.expander("Original-Aufnahme anzeigen"):
+                st.image(input_image_bytes, caption="So wurdest du fotografiert", width=300)
 
     with col2:
         st.write("📱 Foto herunterladen")

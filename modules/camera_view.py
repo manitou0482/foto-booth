@@ -55,6 +55,7 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
             st.rerun()
 
     elif state.phase == "processing":
+        st.image(state.captured_image_bytes, caption="So wurde dein Foto aufgenommen", width=220)
         placeholder = st.empty()
         with placeholder:
             ui_components.render_loading_spinner()
@@ -72,7 +73,7 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
         if state.error:
             st.error(f"Fehler bei der KI-Generierung: {state.error}")
         else:
-            ui_components.render_result(state.result_image_url)
+            ui_components.render_result(state.result_image_url, state.captured_image_bytes)
 
 
 def _render_all_in_one(state, themes, admin_settings):

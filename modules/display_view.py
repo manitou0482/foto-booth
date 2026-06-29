@@ -27,7 +27,7 @@ def render(state, themes):
         if state.error:
             st.error(f"Fehler: {state.error}")
         else:
-            ui_components.render_result(state.result_image_url)
+            ui_components.render_result(state.result_image_url, state.captured_image_bytes)
         if st.button("🔄 Nächste Runde"):
             state.reset()
             st.rerun()
