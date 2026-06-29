@@ -103,7 +103,14 @@ def render_result(result_url: str):
             st.info("Druckdialog geöffnet - Drucker auswählen.")
 
         share_text = urllib.parse.quote(f"Mein Wonderbox-Bild: {result_url}")
-        st.link_button("📲 WhatsApp", f"https://wa.me/?text={share_text}", use_container_width=True)
+
+        phone = st.text_input(
+            "Telefonnummer (optional, mit Ländervorwahl, z.B. 4915512345678)",
+            key=f"whatsapp_phone_{result_url}",
+        )
+        phone_digits = "".join(ch for ch in phone if ch.isdigit())
+        whatsapp_url = f"https://wa.me/{phone_digits}?text={share_text}" if phone_digits else f"https://wa.me/?text={share_text}"
+        st.link_button("📲 WhatsApp", whatsapp_url, use_container_width=True)
         st.link_button(
             "📧 E-Mail",
             f"mailto:?subject=Mein%20Wonderbox-Bild&body={share_text}",
