@@ -468,7 +468,18 @@ def _build_prompt(prompt: str, num_people: int) -> str:
         "Style all clothing and costume details to naturally match each person's own "
         "apparent gender presentation from the reference photo. "
     )
-    return gender_clause + count_clause + prompt
+
+    # Helme/Masken/Visiere, die das Gesicht stark verdecken, verhindern, dass
+    # Schritt 2 (Face-Swap) das echte Gesicht zuverlässig übertragen kann -
+    # das Ergebnis behält dann das generische, hier erzeugte Gesicht statt
+    # des echten. Deshalb unabhängig vom jeweiligen Thema/Kostüm verlangen,
+    # dass Gesichter klar sichtbar bleiben.
+    visibility_clause = (
+        "Every person's face must stay fully visible and unobstructed - no helmets, "
+        "masks, full-face visors, or hoods covering any part of the face, even if "
+        "the costume would normally include one. "
+    )
+    return gender_clause + visibility_clause + count_clause + prompt
 
 
 def generate_image(image_bytes: bytes, prompt: str, theme_id: str) -> str:
