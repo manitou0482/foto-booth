@@ -65,7 +65,9 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
             ui_components.render_loading_spinner()
         theme = next(t for t in themes if t["id"] == state.theme_id)
         try:
-            url = fal_client.generate_image(state.captured_image_bytes, theme["prompt"], theme["id"])
+            url = fal_client.generate_image(
+                state.captured_image_bytes, theme["prompt"], admin_settings.scene_quality
+            )
             state.result_image_url = url
         except Exception as e:
             state.error = str(e)

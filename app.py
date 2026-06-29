@@ -66,6 +66,13 @@ camera_label = st.sidebar.radio(
 )
 admin_settings.camera_facing = "environment" if camera_label == "Rückkamera" else "user"
 
+quality_label = st.sidebar.radio(
+    "Bildqualität",
+    ["Schnell (Party)", "Hohe Qualität (Pro)"],
+    index=0 if admin_settings.scene_quality == "dev" else 1,
+)
+admin_settings.scene_quality = "dev" if quality_label == "Schnell (Party)" else "pro"
+
 if mode == "1 Gerät":
     state = get_session_state()
     camera_view.render(state, themes, admin_settings, all_in_one=True)

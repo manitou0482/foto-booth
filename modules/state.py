@@ -36,6 +36,7 @@ class AdminSettings:
     unabhängig vom gewählten Aufbau (1 oder 2 Geräte), da die physische
     Kamera-Hardware sich nicht pro Gast ändert."""
     camera_facing: str = "environment"  # "environment" = Rückkamera, "user" = Frontkamera
+    scene_quality: str = "dev"  # "dev" = schnell (Party), "pro" = höhere Qualität
 
 
 @st.cache_resource
