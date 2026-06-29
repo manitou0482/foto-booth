@@ -15,8 +15,22 @@ def load_themes():
         return json.load(f)
 
 
-def render_theme_picker(themes, on_select):
-    """Zeigt die Themen als Grid aus Buttons. Ruft on_select(theme_id) auf."""
+def render_theme_picker(themes, state, on_select):
+    """Zeigt zuerst die Personenanzahl-Auswahl, dann die Themen als Grid aus
+    Buttons. Ruft on_select(theme_id) auf.
+
+    Die Personenanzahl steuert, ob fal_client einen Mehrpersonen-Hinweis vor
+    den Theme-Prompt setzt (siehe modules/fal_client.py) - ohne diesen
+    Hinweis lässt die KI bei Themen mit Einzahl-Formulierung ("the person")
+    weitere Personen aus dem Originalfoto einfach weg."""
+    num_people_label = st.radio(
+        "Wie viele Personen sind auf dem Foto?",
+        ["1 Person", "2 Personen"],
+        horizontal=True,
+        key="num_people_choice",
+    )
+    state.num_people = 1 if num_people_label == "1 Person" else 2
+
     st.subheader("Wähle dein Abenteuer ✨")
     cols_per_row = 4
     for i in range(0, len(themes), cols_per_row):

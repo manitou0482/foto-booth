@@ -41,7 +41,9 @@ def _run_capture_flow(state, themes, waiting_message: str):
         with st.spinner("✨ Die KI verwandelt euer Foto... (kann ein paar Sekunden dauern)"):
             theme = next(t for t in themes if t["id"] == state.theme_id)
             try:
-                url = fal_client.generate_image(state.captured_image_bytes, theme["prompt"])
+                url = fal_client.generate_image(
+                    state.captured_image_bytes, theme["prompt"], num_people=state.num_people
+                )
                 state.result_image_url = url
             except Exception as e:
                 state.error = str(e)
@@ -59,7 +61,7 @@ def _render_all_in_one(state, themes):
     st.title("📸 KI-Fotobox")
 
     if state.phase == "idle":
-        ui_components.render_theme_picker(themes, on_select=lambda tid: _start_theme(state, tid))
+        ui_components.render_theme_picker(themes, state, on_select=lambda tid: _start_theme(state, tid))
     else:
         _run_capture_flow(state, themes, waiting_message="")
         if state.phase == "result":

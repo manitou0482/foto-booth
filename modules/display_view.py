@@ -15,7 +15,7 @@ def render(state, themes):
     st_autorefresh(interval=1500, key="display_poll")
 
     if state.phase == "idle":
-        ui_components.render_theme_picker(themes, on_select=lambda tid: _start_theme(state, tid))
+        ui_components.render_theme_picker(themes, state, on_select=lambda tid: _start_theme(state, tid))
 
     elif state.phase in ("theme_selected", "countdown", "captured_ready"):
         st.info("📷 Schau in die Kamera oben in der Box! Countdown läuft dort gerade...")
