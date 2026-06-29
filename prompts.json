@@ -3,28 +3,28 @@
     "id": "urzeit_dschungel",
     "label": "🦖 Urzeit-Dschungel",
     "prompt": "A cinematic, unpredictable action shot of the person from @image1 captured in a spontaneous jungle encounter with prehistoric wildlife. High variance in dramatic camera angles. The person interacts naturally with a dinosaur in an unexpected, creative posture, wearing rugged adventure gear. Random prehistoric elements, lush ancient flora, or hidden valley details appear uniquely in the scene. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Dramatic cinematic lighting with volumetric dust motes caught in sun rays. Award-winning National Geographic photography style, masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/dino_ritt.jpg",
+    "preview": "assets/previews/urzeit_dschungel.jpg",
     "short_label": "Dschungel"
   },
   {
     "id": "galaktische_odyssee",
     "label": "🚀 Galaktische Odyssee",
     "prompt": "An atmospheric cosmic shot of the person from @image1 deep in outer space. High variance in composition: the person could be floating inside a glowing nebula, exploring an alien planet surface, or inside a high-tech spaceship cockpit, wearing an advanced sci-fi suit. Spontaneous cosmic phenomena and unpredictable interstellar details appear uniquely in each frame. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Dramatic cinematic lighting, atmospheric depth. Award-winning National Geographic photography style, masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/astronaut.jpg",
+    "preview": "assets/previews/galaktische_odyssee.jpg",
     "short_label": "Galaxie"
   },
   {
     "id": "wilder_westen",
     "label": "🤠 Wilder Westen",
     "prompt": "A gritty, spontaneous western photograph of the person from @image1. High variance in scenes: captured inside a dusty saloon, during a midday duel on a main street, or riding through a sun-drenched canyon, wearing rugged frontier clothing. Unpredictable western details and random characters make every image a unique cowboy story. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Dramatic cinematic lighting with volumetric dust motes caught in sun rays. Award-winning National Geographic photography style, masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/wild_west_sheriff.jpg",
+    "preview": "assets/previews/wilder_westen.jpg",
     "short_label": "Wildwest"
   },
   {
     "id": "ritter_burgen",
     "label": "⚔️ Ritter & Burgen",
     "prompt": "An epic, unscripted fantasy photograph of the person from @image1. High variance in dramatic action poses: standing on a castle wall during a siege, exploring a hidden dragon cave, or sitting at a medieval banquet, with their outfit completely replaced by intricate heroic armor or royal garments. Spontaneous mythical elements and historic details appear randomly. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Dramatic cinematic lighting with volumetric dust motes caught in sun rays. Award-winning National Geographic photography style, masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/medieval_knight.jpg",
+    "preview": "assets/previews/ritter_burgen.jpg",
     "short_label": "Ritter"
   },
   {
@@ -38,105 +38,105 @@
     "id": "retro_80er",
     "label": "🪩 80er-Jahre Retro",
     "prompt": "A spontaneous, vibrant 1980s neon party photograph of the person from @image1. High variance in composition: dancing under a disco ball, holding a giant boombox, or roller-skating, with outfits randomly replaced by bright neon windbreakers, leg warmers, or retro tracksuits. Unexpected retro party elements appear in each frame. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Harsh direct flash photography, subtle red-eye effect, authentic 80s disposable camera aesthetic, genuine analog film grain. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/disco_70s.jpg",
+    "preview": "assets/previews/retro_80er.jpg",
     "short_label": "80er"
   },
   {
     "id": "cyberpunk_2077",
     "label": "🕶️ Cyberpunk 2077",
     "prompt": "A dark, atmospheric cyberpunk portrait of the person from @image1 in a rain-slicked futuristic city at night. High variance in scenes: driving a futuristic motorcycle, hacking a glowing terminal, or standing in a neon-lit bar, wearing a high-tech cybernetic jacket with glowing LED lines. Unpredictable holographic ads appear in the blurry background. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Intense cyberpunk neon glow with vibrant cyan and magenta light reflections bleeding onto the face. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/cyberpunk.jpg",
+    "preview": "assets/previews/cyberpunk_2077.jpg",
     "short_label": "Cyberpunk"
   },
   {
     "id": "piraten_abenteuer",
     "label": "🏝️ Piraten-Abenteuer",
     "prompt": "An epic, unpredictable seafaring shot of the person from @image1 as a notorious pirate captain. High variance: standing on the stormy deck of a galleon, swinging a cutlass, or opening a chest full of gold on a tropical beach, wearing an authentic historical pirate tricorn hat and coat. Dramatic ocean waves and random parrot or pirate crew details appear in the scene. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Dramatic cinematic lighting with volumetric dust motes caught in sun rays. Award-winning National Geographic photography style, masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/pirate_captain.jpg",
+    "preview": "assets/previews/piraten_abenteuer.jpg",
     "short_label": "Piraten"
   },
   {
     "id": "unterwasser_atlantis",
     "label": "🔱 Unterwasser-Atlantis",
     "prompt": "A breathtaking, spontaneous underwater shot of the person from @image1 exploring the sunken kingdom of Atlantis. High variance in composition: swimming with glowing jellyfish, discovering ancient columns, or wearing ornate royal mer-folk armor, surrounded by floating air bubbles, colorful coral reefs, and random mysterious sea creatures. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Ethereal sub-aquatic dramatic cinematic lighting with shafts of light piercing the water. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/mermaid_underwater.jpg",
+    "preview": "assets/previews/unterwasser_atlantis.jpg",
     "short_label": "Atlantis"
   },
   {
     "id": "vampir_schloss",
     "label": "🧛 Vampir-Schloss",
     "prompt": "A moody, gothic horror portrait of the person from @image1 as an elegant vampire. High variance: standing on a grand castle staircase, looking out of a foggy window under a full moon, or holding a vintage chalice, wearing a velvet cape and Victorian gothic clothing. Unpredictable eerie atmospheric details appear in each frame. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Dark dramatic cinematic shadows, flickering candle lighting, genuine analog film grain, subtle lens flare. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/renaissance_royalty.jpg",
+    "preview": "assets/previews/vampir_schloss.jpg",
     "short_label": "Vampir"
   },
   {
     "id": "film_noir_detektiv",
     "label": "🕵️‍♂️ Film Noir Detektiv",
     "prompt": "A dramatic 1940s black and white cinema shot of the person from @image1. High variance in composition: standing under a smoky streetlamp, looking through office blinds, or holding a vintage magnifying glass, wearing a classic trench coat and fedora hat. Unpredictable hard-boiled detective details and rain-slicked dark streets appear in each frame. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Strong contrast chiaroscuro lighting, genuine analog film grain, subtle lens flare, chromatic aberration. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/egyptian_pharaoh.jpg",
+    "preview": "assets/previews/film_noir_detektiv.jpg",
     "short_label": "Film Noir"
   },
   {
     "id": "zombie_apokalypse",
     "label": "🧟 Zombie-Apokalypse",
     "prompt": "A gritty, hyper-realistic survival action shot of the person from @image1. High variance: barricaded in an abandoned gritty warehouse, holding a makeshift flashlight tool, or navigating a ruined overgrown city street, wearing weathered tactical survival gear. Unpredictable details of a collapsed world appear in the background. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Cinematic suspense lighting, harsh direct flash photography, authentic disposable camera aesthetic, gritty desaturated tones. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/winter_wonderland_santa.jpg",
+    "preview": "assets/previews/zombie_apokalypse.jpg",
     "short_label": "Zombie"
   },
   {
     "id": "hollywood_roter_teppich",
     "label": "👑 Hollywood Roter Teppich",
     "prompt": "A glamorous celebrity snapshot of the person from @image1 arriving at a major movie premiere. High variance in camera angles: walking the red carpet, posing for flashing paparazzi cameras, or holding a golden award trophy, wearing a stunning, expensive luxury evening gown or a sharp tailored tuxedo. Bright flashbulbs and a glamorous atmosphere fill the scene. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Professional studio softbox lighting, wrap-around light, subtle rim light. Award-winning photography style, masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/gatsby_1920s.jpg",
+    "preview": "assets/previews/hollywood_roter_teppich.jpg",
     "short_label": "Red Carpet"
   },
   {
     "id": "formel1_rennfahrer",
     "label": "🏎️ Formel 1 Rennfahrer",
     "prompt": "A high-octane racing shot of the person from @image1 as a professional motorsport driver. High variance: holding a helmet next to a roaring supercar, celebrating on a podium with champagne, or standing in the fast pit lane, wearing a highly detailed racing jumpsuit with sponsor patches. Vibrant racetrack environment and motion blur add dynamic energy. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Dramatic cinematic lighting and camera angles. Award-winning sports photography style, masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/safari_adventure.jpg",
+    "preview": "assets/previews/formel1_rennfahrer.jpg",
     "short_label": "Formel 1"
   },
   {
     "id": "zauberer_akademie",
     "label": "🧙‍♂️ Zauberer-Akademie",
     "prompt": "A magical fantasy shot of the person from @image1 as a powerful wizard or witch. High variance: casting a glowing spell with a wand, reading an ancient floating book of spells, or standing inside a grand library with flying candles, wearing dark mystical robes. Vibrant magical sparks and unexpected mythical creatures or potions appear randomly. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Dramatic cinematic lighting with volumetric dust motes caught in floating candlelight. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/fairy_tale_forest.jpg",
+    "preview": "assets/previews/zauberer_akademie.jpg",
     "short_label": "Zauberer"
   },
   {
     "id": "vintage_strand_50er",
     "label": "🏖️ 1950s Vintage Strand",
     "prompt": "A cheerful, retro sun-drenched photograph of the person from @image1 on a 1950s California beach. High variance in scenes: relaxing on a colorful striped towel, holding a vintage surfboard, or standing next to a classic retro camper van, wearing authentic 50s style swimwear or high-waisted fashion. A nostalgic summer atmosphere fills the scene. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Bright warm sunshine, vintage Polaroid color grading, slightly faded contrast, genuine analog film grain. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/tropical_beach_paradise.jpg",
+    "preview": "assets/previews/vintage_strand_50er.jpg",
     "short_label": "Strand 50er"
   },
   {
     "id": "samurai_legende",
     "label": "🏯 Samurai-Legende",
     "prompt": "An intense, artistic historical shot of the person from @image1 as a legendary samurai in ancient Japan. High variance: meditating in a peaceful zen garden with cherry blossoms, or standing in a dramatic pose in front of a traditional pagoda, wearing intricate, detailed samurai armor or a flowing kimono. Soft mist and fallen pink petals drift through the scene. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Moody dramatic cinematic lighting. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/viking_warrior.jpg",
+    "preview": "assets/previews/samurai_legende.jpg",
     "short_label": "Samurai"
   },
   {
     "id": "pixar_3d_animation",
     "label": "🧸 3D Pixar Animation",
     "prompt": "A delightful, creative 3D animated movie style portrait of the person from @image1. Recreated in the signature style of modern Pixar and Disney animations. High variance in composition: the person could be interacting with a cute talking animal, exploring a whimsical fantasy village, or discovering a magical forest. Vibrant saturated colors, soft cinematic clay-like lighting, 8k resolution.",
-    "preview": "assets/previews/anime_hero.jpg",
+    "preview": "assets/previews/pixar_3d_animation.jpg",
     "short_label": "Pixar"
   },
   {
     "id": "rockstar_arena",
     "label": "🎸 Rock-Star Arena",
     "prompt": "An explosive, high-energy concert photograph of the person from @image1 performing as a rock god. High variance: singing into a microphone under blinding stage lights, shredding an electric guitar, or facing a massive cheering stadium crowd, with outfits randomly replaced by edgy leather jackets or rock star clothes. Heavy stage fog and raw rock energy fill the scene. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Harsh direct stage flash photography, authentic 90s disposable camera aesthetic, genuine analog film grain, lens flares. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/superhero.jpg",
+    "preview": "assets/previews/rockstar_arena.jpg",
     "short_label": "Rockstar"
   },
   {
     "id": "steampunk_tueftler",
     "label": "🧸 Steampunk-Tüftler",
     "prompt": "An intricate, detailed steampunk portrait of the person from @image1 as an inventor. High variance: operating a massive brass clockwork machine, looking through mechanical leather goggles, or holding a glowing copper gadget, wearing Victorian explorer clothing with brass gear wheels and leather straps. Industrial details and drifting smoke fill the scene. Every person's face must stay fully visible and unobstructed - no helmets, masks, full-face visors, or hoods covering any part of the face, even if the costume would normally include one. Highly detailed skin texture, pores visible, realistic eye glint, tack-sharp focus on the subject. Captured on a 35mm prime lens, f/1.8 aperture, shallow depth of field. Warm copper industrial dramatic cinematic lighting with drifting smoke and rim light. Masterpiece quality, 8k resolution.",
-    "preview": "assets/previews/scifi_mech_pilot.jpg",
+    "preview": "assets/previews/steampunk_tueftler.jpg",
     "short_label": "Steampunk"
   }
 ]
