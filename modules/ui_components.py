@@ -61,7 +61,7 @@ def render_auto_capture_trigger():
     """
     st.components.v1.html(
         """
-        <div id="autocap-status" style="font-family:sans-serif; font-size:0.8rem; color:#888;"></div>
+        <div id="autocap-status" style="font-family:sans-serif; font-size:1.3rem; font-weight:bold; color:white; background:red; padding:8px;">DEBUG v2 - Skript gestartet...</div>
         <script>
         (function() {
             const statusEl = document.getElementById('autocap-status');
@@ -100,7 +100,7 @@ def render_auto_capture_trigger():
         })();
         </script>
         """,
-        height=30,
+        height=60,
     )
 
 
