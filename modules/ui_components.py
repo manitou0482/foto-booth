@@ -47,6 +47,83 @@ def render_countdown(seconds: int = 3):
     placeholder.empty()
 
 
+def render_auto_capture_trigger():
+    """Klickt den internen 'Take Photo'-Button von st.camera_input automatisch,
+    sobald er im DOM erscheint - damit nach dem Countdown niemand mehr selbst
+    auf den Auslöser tippen muss.
+
+    Funktioniert, weil st.components.v1.html ein Iframe rendert, das über
+    window.parent.document Zugriff auf die Hauptseite hat. Das ist KEIN
+    offiziell dokumentiertes Streamlit-Feature - es verlässt sich auf den
+    aktuell stabilen Button-Text "Take Photo" im camera_input-Widget. Der
+    manuelle Button bleibt als Fallback sichtbar, falls der Auto-Klick
+    (z.B. wegen einer künftigen Streamlit-Version) mal nicht greift.
+    """
+    st.components.v1.html(
+        """
+        <div id="autocap-status" style="font-family:sans-serif; font-size:1.3rem; font-weight:bold; color:white; background:red; padding:8px;">DEBUG v2 - Skript gestartet...</div>
+        <script>
+        (function() {
+            const statusEl = document.getElementById('autocap-status');
+            function setStatus(msg) { if (statusEl) { statusEl.textContent = msg; } }
+
+            function simulateRealClick(el, win) {
+                const rect = el.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                const base = { bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, view: win };
+                ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'].forEach(function(type) {
+                    const Ctor = type.indexOf('pointer') === 0 ? win.PointerEvent : win.MouseEvent;
+                    try {
+                        el.dispatchEvent(new Ctor(type, base));
+                    } catch (e) {
+                        el.dispatchEvent(new win.MouseEvent(type, base));
+                    }
+                });
+            }
+
+            const candidates = ['take photo', 'take a photo', 'capture', 'foto aufnehmen', 'aufnehmen'];
+            let attempts = 0;
+            let clickedOnce = false;
+            const maxAttempts = 150; // ca. 30s bei 200ms Intervall
+
+            const interval = setInterval(function() {
+                attempts++;
+                try {
+                    const buttons = window.parent.document.querySelectorAll('button');
+                    const visible = Array.from(buttons).filter(function(b) {
+                        return b.offsetWidth > 0 && b.offsetHeight > 0 && !b.disabled;
+                    });
+                    setStatus('Suche Auslöser... (Versuch ' + attempts + ', ' + visible.length + ' sichtbare Buttons)');
+                    for (const btn of visible) {
+                        const label = ((btn.innerText || '') + ' ' + (btn.getAttribute('aria-label') || '') + ' ' + (btn.title || ''))
+                            .trim()
+                            .toLowerCase();
+                        if (candidates.some(function(c) { return label.includes(c); })) {
+                            simulateRealClick(btn, window.parent);
+                            clickedOnce = true;
+                            setStatus('Auslöser geklickt (Versuch ' + attempts + '), warte auf Reaktion...');
+                            clearInterval(interval);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    setStatus('Fehler beim Zugriff auf die Seite: ' + e.message);
+                    clearInterval(interval);
+                    return;
+                }
+                if (attempts >= maxAttempts) {
+                    setStatus(clickedOnce ? 'Geklickt, aber keine Reaktion erkannt.' : 'Auslöser nach ' + maxAttempts + ' Versuchen nicht gefunden.');
+                    clearInterval(interval);
+                }
+            }, 200);
+        })();
+        </script>
+        """,
+        height=60,
+    )
+
+
 def make_qr_png(url: str) -> bytes:
     img = qrcode.make(url)
     buf = io.BytesIO()
