@@ -9,7 +9,7 @@
   {
     "id": "astronaut",
     "label": "🚀 Astronaut (Weltall-Reise)",
-    "prompt": "The person from the photo, wearing a detailed high-tech NASA astronaut spacesuit with helmet, floating inside the International Space Station, {ACTION}. Through the large helmet visor, the blue planet Earth is visibly reflecting. Cosmic starlight outside the window, soft blue-white console lighting. Shot on a Hasselblad H6D, 35mm lens, f/2, photorealistic, sharp focus, cinematic medium shot with visible upper body and arms.",
+    "prompt": "The person from the photo, their face completely bare and clearly visible with no helmet or visor covering it, wearing a detailed high-tech NASA astronaut spacesuit with the helmet removed and held casually under one arm, floating inside the International Space Station, {ACTION}. The blue planet Earth is visible through a large window behind them. Cosmic starlight outside the window, soft blue-white console lighting. Shot on a Hasselblad H6D, 35mm lens, f/2, photorealistic, sharp focus on the unobstructed face, cinematic medium shot with visible upper body and arms.",
     "preview": "assets/previews/astronaut.jpg",
     "short_label": "Astronaut"
   },

@@ -1,22 +1,28 @@
-"""Anbindung an die fal.ai API für FLUX.1 Kontext [pro] (bild-editierende Generierung).
+"""Anbindung an fal.ai - Zwei-Schritt-Pipeline: Szene generieren + Gesicht tauschen.
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
 
-Hinweis zur Modellwahl (empirisch getestet, siehe Konversation):
-- Klassisches Image-to-Image (FLUX.1 [dev] image-to-image mit "strength")
-  hat keinen Wert, der gleichzeitig (a) das Gesicht erhält UND (b) die Szene
-  vollständig verändert - dasselbe Rauschen, das große Kompositionsänderungen
-  ermöglicht, verändert zwangsläufig auch das Gesicht.
-- PuLID-FLUX (Einzelperson-Identität) löst (a)+(b) für EINE Person gut,
-  unterstützt aber keine Gruppenfotos mit mehreren erkennbaren Gesichtern.
-- FLUX.1 Kontext [pro] (fal-ai/flux-pro/kontext) bearbeitet das tatsächliche
-  Foto per Text-Instruktion, statt die Szene komplett neu zu generieren.
-  Dadurch bleiben automatisch ALLE im Originalfoto vorhandenen Gesichter
-  erhalten - auch bei 2 Personen (Vater+Kind im Test klar unterscheidbar) -
-  UND die Pose wird trotzdem vollständig zum Prompt passend neu erzeugt
-  (z.B. sitzend auf einem Dinosaurier statt der ursprünglichen Stehpose).
-  Das ist der aktuell verwendete Endpoint.
+Hinweis zur Architektur (empirisch nach intensivem Live-Testen mit echten
+Gästefotos ermittelt, siehe Konversation):
+- Ein einzelner Aufruf an FLUX.1 Kontext [pro] mit der Anweisung "behalte das
+  Gesicht UND ändere Pose/Kleidung/Hintergrund radikal" funktioniert NUR bei
+  Themen, die nah an der Originalkomposition bleiben (z.B. Pirat, Cyberpunk -
+  Person bleibt stehend, Gesicht frei sichtbar). Bei Themen mit starker
+  Verdeckung (Astronaut-Helm) oder dramatischer Pose-Änderung (Dino-Ritt)
+  "vergisst" das Modell das Originalgesicht zuverlässig - das ist eine
+  strukturelle Grenze, kein Prompt-Problem, und kein Gewichts-Wert behebt das.
+- Lösung: Pose-Generierung und Gesichts-Identität werden in zwei
+  unabhängige Schritte aufgeteilt (vermutlich macht Touchpix das ähnlich):
+  1) FLUX.1 Kontext [pro] erzeugt die Szene (Pose, Kleidung, Hintergrund)
+     mit voller kreativer Freiheit - OHNE Identitäts-Zwang, der die Pose
+     ohnehin nur einschränkt, ohne zuverlässig zu wirken.
+  2) fal-ai/face-swap setzt das ECHTE Gesicht aus dem Originalfoto auf das
+     generierte Bild. Face-Swap-Modelle sind speziell darauf trainiert,
+     ein Gesicht auf eine andere Kopf-/Körperhaltung zu übertragen - das ist
+     robuster als Identität "by prompt" zu erzwingen. Ein einzelner Aufruf
+     mit dem ganzen Gruppenfoto als Quelle und Ziel tauscht dabei empirisch
+     bestätigt auch bei 2 Personen beide Gesichter korrekt positionsweise.
 """
 import io
 import random
@@ -24,7 +30,8 @@ import random
 import fal_client
 from PIL import Image
 
-MODEL_ENDPOINT = "fal-ai/flux-pro/kontext"
+SCENE_MODEL_ENDPOINT = "fal-ai/flux-pro/kontext"
+FACE_SWAP_ENDPOINT = "fal-ai/face-swap"
 PERSON_DETECTION_ENDPOINT = "fal-ai/moondream2/object-detection"
 
 GUIDANCE_SCALE = 3.5
@@ -206,14 +213,13 @@ def _detect_num_people(image_url: str) -> int:
 def _build_prompt(prompt: str, num_people: int) -> str:
     """Themen-Prompts sind teils in Einzahl ("the person"), teils in Mehrzahl
     ("the people") formuliert - unabhängig von der tatsächlichen Personenzahl
-    im Foto. Ein vorangestellter Hinweissatz allein reicht nicht immer aus:
-    bei Themen mit enger, auf eine Person zugeschnittener Bildsprache (z.B.
-    Ritter-Porträt, Astronaut-Helm-Closeup) hält sich Kontext eher an die
-    Formulierung im eigentlichen Theme-Text als an den Zusatzsatz. Deshalb
-    wird die Einzahl/Mehrzahl-Formulierung jetzt direkt im Prompt-Text selbst
-    ausgetauscht (zusätzlich zum Hinweissatz) - funktioniert für alle 20
-    Themen gleich, ohne dass die Prompts selbst manuell angepasst werden
-    müssen."""
+    im Foto. Die Einzahl/Mehrzahl-Formulierung wird direkt im Prompt-Text
+    selbst ausgetauscht (zusätzlich zum Hinweissatz) - funktioniert für alle
+    20 Themen gleich, ohne dass die Prompts selbst manuell angepasst werden
+    müssen. Kein Identitäts-Hinweis mehr nötig: Das Gesicht wird nicht mehr
+    von diesem Schritt erzeugt, sondern in Schritt 2 (Face-Swap) ersetzt -
+    dieser Schritt darf sich daher voll auf Pose/Kleidung/Hintergrund
+    konzentrieren, ohne durch einen Identitäts-Zwang eingeschränkt zu sein."""
     if num_people <= 1:
         prompt = prompt.replace("The people from the photo", "The person from the photo")
         count_clause = (
@@ -224,41 +230,47 @@ def _build_prompt(prompt: str, num_people: int) -> str:
         prompt = prompt.replace("The person from the photo", "The people from the photo")
         count_clause = (
             f"There are {num_people} people in the reference photo. Include ALL of them "
-            f"in the new image, each keeping their own distinct face and identity. "
+            f"in the new image, each in their own distinct pose. "
         )
 
-    # Identität hat oberste Priorität, Kleidung soll zum jeweiligen Geschlecht
-    # passen statt einer festen (oft männlich wirkenden) Standardvariante.
-    identity_clause = (
-        "Keep the exact facial identity, face shape, skin tone, and features of each "
-        "person from the reference photo completely unchanged - only change their pose, "
-        "clothing, and the background as described below. Style all clothing and "
-        "costume details to naturally match each person's own apparent gender "
-        "presentation from the reference photo. "
+    # Kleidung soll zum jeweiligen Geschlecht passen statt einer festen
+    # (oft männlich wirkenden) Standardvariante.
+    gender_clause = (
+        "Style all clothing and costume details to naturally match each person's own "
+        "apparent gender presentation from the reference photo. "
     )
-    return identity_clause + count_clause + prompt
+    return gender_clause + count_clause + prompt
 
 
 def generate_image(image_bytes: bytes, prompt: str, theme_id: str) -> str:
-    """Lädt das Gästefoto zu fal.ai hoch, erkennt automatisch die Anzahl der
-    Personen im Foto und lässt FLUX.1 Kontext daraus ein neues,
-    themenpassendes Bild erzeugen, das alle erkannten Gesichter erhält.
-    Gibt die URL des Ergebnisbilds zurück."""
+    """Zwei-Schritt-Pipeline:
+    1) FLUX.1 Kontext erzeugt die themenpassende Szene (Pose/Kleidung/
+       Hintergrund) mit voller kreativer Freiheit aus dem Gästefoto.
+    2) fal-ai/face-swap setzt das echte Gesicht aus dem Originalfoto auf
+       das generierte Bild - das macht die Gesichts-Identität unabhängig
+       davon, wie dramatisch die Pose/Verdeckung im jeweiligen Thema ist.
+    Gibt die URL des finalen Ergebnisbilds zurück."""
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
 
     num_people = _detect_num_people(image_url)
     prompt = _randomize_action(theme_id, prompt)
 
-    result = fal_client.run(
-        MODEL_ENDPOINT,
+    scene_result = fal_client.run(
+        SCENE_MODEL_ENDPOINT,
         arguments={
             "prompt": _build_prompt(prompt, num_people),
             "image_url": image_url,
             "guidance_scale": GUIDANCE_SCALE,
         },
     )
-    return result["images"][0]["url"]
+    scene_url = scene_result["images"][0]["url"]
+
+    swap_result = fal_client.run(
+        FACE_SWAP_ENDPOINT,
+        arguments={"base_image_url": scene_url, "swap_image_url": image_url},
+    )
+    return swap_result["image"]["url"]
 
 
 # ---------------------------------------------------------------------------
