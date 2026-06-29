@@ -1,0 +1,6 @@
+streamlit>=1.32
+fal-client
+qrcode[pil]
+Pillow
+streamlit-autorefresh
+requests

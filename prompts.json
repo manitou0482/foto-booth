@@ -1,0 +1,102 @@
+[
+  {
+    "id": "dino_ritt",
+    "label": "🦕 Dino-Ritt (Test-Standard)",
+    "prompt": "A cinematic, photorealistic action shot of the people from the photo. Change their posture completely so they are riding rittlings on the back of a massive, friendly green dinosaur in a prehistoric Jurassic jungle. Automatically transform their current modern outfits into matching vintage explorer clothing, safari shirts, and khaki adventure gear. Intelligently convert any modern items or bottles held in their hands into authentic prehistoric equipment, like glowing explorer torches, old wooden walking sticks, or ancient dinosaur bones. The people look incredibly happy, laughing, and waving directly at the camera. Highly detailed faces, vibrant tropical jungle background with giant ferns, ancient trees, dramatic sun rays cutting through the canopy, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "astronaut",
+    "label": "🚀 Astronaut (Weltall-Reise)",
+    "prompt": "A breathtaking, photorealistic cinematic closeup of the person from the photo wearing a detailed high-tech NASA astronaut spacesuit inside the International Space Station. The person is looking directly into the camera with a joyful expression. Through the large visor of the helmet, the beautiful blue planet Earth is visibly reflecting. Cosmic starlight, soft internal spaceship console lighting, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "cyberpunk",
+    "label": "🌆 Cyberpunk (Zukunfts-Held)",
+    "prompt": "A vibrant, cinematic cyberpunk portrait of the person from the photo standing in a rain-slicked neon-lit alleyway of Neo-Tokyo at night. Automatically transform their clothes into a high-tech dark leather jacket with glowing cyan and magenta LED fiber optics. Futuristic digital neon reflections dance across their highly detailed face. Mysterious, atmospheric volumetric fog and bright holographic advertisements in the blurry background, cinematic composition, 8k resolution."
+  },
+  {
+    "id": "medieval_knight",
+    "label": "🛡️ Medieval Knight (Ritterrüstung)",
+    "prompt": "An epic, photorealistic medium shot of the person from the photo transformed into a heroic medieval knight. Their modern clothes are completely replaced by detailed, polished steel plate armor with intricate engravings. The person faces the camera with a confident, proud smile. Background is the majestic stone courtyard of an ancient fantasy castle during a golden hour sunset, warm cinematic sun flares, masterpiece, ultra-detailed, 8k."
+  },
+  {
+    "id": "pop_art_comic",
+    "label": "🎨 Pop-Art Comic (Kunstfilter)",
+    "prompt": "A stylish, high-quality modern comic book illustration of the person from the photo. Pop-art style inspired by Roy Lichtenstein and modern graphic novels. Bold clean ink outlines, vibrant halftone dot shading, and saturated colors. The person keeps their exact facial expression and pose, but their clothes and background are stylized into a colorful abstract comic background with retro explosive shapes, professional digital illustration, sharp focus."
+  },
+  {
+    "id": "pirate_captain",
+    "label": "🏴‍☠️ Pirate Captain (Piraten-Kapitän)",
+    "prompt": "A dramatic, photorealistic action portrait of the person from the photo transformed into a legendary pirate captain. Automatically replace their modern clothes with a weathered tricorn hat, an ornate captain's coat, a ruffled white shirt, and a leather belt. Convert any items held in their hands into an antique cutlass or a glowing lantern. The person grins confidently directly at the camera, wind blowing through their hair. Background is the wooden deck of a galleon ship at sunset, stormy ocean waves, dramatic golden light, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "wild_west_sheriff",
+    "label": "🤠 Wild West Sheriff (Wildwest-Sheriff)",
+    "prompt": "A cinematic, photorealistic portrait of the person from the photo transformed into a tough Wild West sheriff. Automatically transform their clothes into a leather vest, a sheriff's star badge, a wide-brimmed cowboy hat, and a red bandana. Convert any modern items in their hands into an old revolver or a coiled lasso rope. The person stands confidently with a determined expression, looking directly at the camera. Background is a dusty frontier town main street at golden hour, wooden saloon buildings, warm dramatic lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "viking_warrior",
+    "label": "⚔️ Viking Warrior (Wikinger-Krieger)",
+    "prompt": "An epic, photorealistic portrait of the person from the photo transformed into a fierce Viking warrior. Automatically replace their modern clothes with fur-lined leather armor, braided rope details, and a horned or wolf-fur helmet. Convert any items in their hands into a battle axe or a round wooden shield with carved runes. The person looks powerful and proud directly at the camera. Background is a misty fjord landscape with longships on the water and dramatic stormy skies, cinematic lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "superhero",
+    "label": "🦸 Superhero (Superheld)",
+    "prompt": "A dynamic, photorealistic action shot of the person from the photo transformed into a powerful superhero. Automatically replace their modern clothes with a sleek, futuristic superhero suit featuring a flowing cape and a glowing emblem on the chest. The person stands in a heroic pose, looking confidently at the camera as if ready for action. Background is a dramatic city skyline at dusk with dynamic light streaks and clouds, cinematic composition, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "mermaid_underwater",
+    "label": "🧜 Mermaid / Underwater World (Meerjungfrau)",
+    "prompt": "A magical, photorealistic portrait of the person from the photo transformed into a mythical mermaid or merman gracefully floating underwater. Automatically transform their lower body and clothing into a shimmering, iridescent fish tail and seashell-inspired top. The person's hair flows weightlessly in the water, their expression joyful and serene. Background is a vibrant coral reef with rays of sunlight piercing through clear turquoise ocean water, schools of colorful fish, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "renaissance_royalty",
+    "label": "👑 Renaissance Royalty (Renaissance-Königshof)",
+    "prompt": "An opulent, photorealistic portrait of the person from the photo transformed into Renaissance-era royalty. Automatically replace their modern clothes with a richly embroidered velvet gown or doublet, ornate golden jewelry, and a delicate crown or jeweled headpiece. The person sits with regal, composed posture, looking elegantly at the camera. Background is a grand palace hall with classical paintings, golden chandeliers, and heavy drapery, warm painterly lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "gatsby_1920s",
+    "label": "🥂 Roaring Twenties Gatsby Glam (1920er)",
+    "prompt": "A glamorous, photorealistic portrait of the person from the photo transformed into a stylish 1920s Gatsby-era socialite. Automatically replace their modern clothes with an elegant flapper dress with sequins and a feather headband, or a sharp pinstripe suit with a fedora hat. The person poses confidently with a charming smile directly at the camera. Background is an opulent Art Deco ballroom with golden light fixtures, champagne glasses, and confetti in the air, cinematic warm lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "anime_hero",
+    "label": "🌸 Anime Hero (Anime-Stil-Held)",
+    "prompt": "A vibrant, high-quality anime-style illustration of the person from the photo transformed into a heroic anime protagonist. Bold clean line art, large expressive eyes, dynamic spiky or flowing hairstyle, and stylized modern adventurer outfit with dramatic flowing fabric. The person keeps their exact facial expression and pose, energetic action background with speed lines and glowing magical effects, vibrant saturated colors, professional digital anime illustration, sharp focus."
+  },
+  {
+    "id": "safari_adventure",
+    "label": "🦁 Safari Adventure (Safari-Abenteuer)",
+    "prompt": "A cinematic, photorealistic action shot of the person from the photo transformed into an adventurous safari explorer. Automatically transform their modern clothes into khaki safari gear, a wide-brimmed explorer hat, and sturdy hiking boots. Convert any modern items in their hands into binoculars or an authentic field journal. The person looks excited and adventurous directly at the camera. Background is the golden African savanna at sunset with acacia trees and distant wildlife silhouettes, warm dramatic lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "winter_wonderland_santa",
+    "label": "🎄 Winter Wonderland / Santa (Weihnachten)",
+    "prompt": "A warm, photorealistic festive portrait of the person from the photo transformed into a joyful Christmas character wearing a cozy red and white Santa-inspired outfit with fluffy white trim. The person smiles warmly and waves at the camera, surrounded by falling snow. Background is a magical winter wonderland village with twinkling fairy lights, decorated pine trees, and a cozy snow-covered cabin, soft golden lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "tropical_beach_paradise",
+    "label": "🏖️ Tropical Beach Paradise (Strandparadies)",
+    "prompt": "A bright, photorealistic vacation-style portrait of the person from the photo transformed into a relaxed tropical paradise traveler. Automatically transform their clothes into a colorful Hawaiian shirt or breezy summer outfit, with a flower lei or sun hat. Convert any modern items in their hands into a fresh tropical cocktail with a paper umbrella. The person smiles happily directly at the camera. Background is a stunning turquoise beach with white sand, palm trees, and a vivid sunset sky, vibrant warm lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "disco_70s",
+    "label": "🕺 Disco 70s Glam (70er-Disco)",
+    "prompt": "A vibrant, photorealistic portrait of the person from the photo transformed into a glamorous 1970s disco icon. Automatically replace their modern clothes with a shiny sequined jumpsuit or flared bell-bottoms with a bold patterned shirt, big collar, and platform shoes. The person strikes a confident, fun dance pose looking at the camera. Background is a colorful retro disco dance floor with a glowing mirror ball, neon lights, and light beams, vibrant saturated cinematic lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "scifi_mech_pilot",
+    "label": "🤖 Sci-Fi Mech Pilot (Mech-Pilot)",
+    "prompt": "A dramatic, photorealistic cinematic portrait of the person from the photo transformed into an elite sci-fi mech pilot. Automatically replace their modern clothes with a sleek high-tech flight suit featuring glowing blue circuit details and a futuristic chest plate. The person looks determined and confident directly at the camera. Background is the open cockpit of a massive futuristic robot mech inside a hangar bay, with holographic control displays and dramatic blue lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "fairy_tale_forest",
+    "label": "🧝 Enchanted Fairy Tale Forest (Märchenwald)",
+    "prompt": "A whimsical, photorealistic fantasy portrait of the person from the photo transformed into a magical forest elf or fairy tale character. Automatically transform their clothes into an elegant woodland outfit made of soft fabrics, leaves, and vines, with delicate pointed ears. The person looks gentle and enchanted, smiling softly at the camera. Background is a glowing enchanted forest with magical floating lights, ancient mossy trees, and soft mystical fog, dreamy cinematic lighting, highly detailed face, masterpiece quality, 8k resolution."
+  },
+  {
+    "id": "egyptian_pharaoh",
+    "label": "🏺 Ancient Egyptian Pharaoh (Pharao)",
+    "prompt": "A majestic, photorealistic portrait of the person from the photo transformed into an ancient Egyptian pharaoh or queen. Automatically replace their modern clothes with a golden ornate headdress, a wide jeweled collar necklace, and flowing white linen robes. The person holds a regal, powerful pose looking directly at the camera. Background is a grand desert temple with massive stone hieroglyph-covered columns and the pyramids visible at golden hour, warm dramatic lighting, highly detailed face, masterpiece quality, 8k resolution."
+  }
+]
