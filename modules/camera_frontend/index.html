@@ -4,22 +4,30 @@
 <meta charset="utf-8">
 <style>
   html, body { margin:0; padding:0; background:transparent; font-family: sans-serif; }
-  #video { width:100%; max-height:420px; object-fit:cover; border-radius:20px; background:#000; display:block; }
+  #video { width:100%; max-height:380px; object-fit:cover; border-radius:20px; background:#000; display:block; }
   #status { font-size:0.75rem; color:#9b8aa8; padding:6px 0; text-align:center; }
+  #manualBtn {
+    display:block; width:100%; margin-top:8px; padding:12px; border:none;
+    border-radius:28px; background:#D4B05A; color:#2A1538; font-weight:700;
+    font-size:1rem; cursor:pointer;
+  }
 </style>
 </head>
 <body>
   <video id="video" autoplay muted playsinline></video>
   <div id="status">Kamera wird initialisiert...</div>
+  <button id="manualBtn">📸 Jetzt aufnehmen</button>
   <canvas id="canvas" style="display:none;"></canvas>
 <script>
 (function () {
     const videoEl = document.getElementById('video');
     const canvasEl = document.getElementById('canvas');
     const statusEl = document.getElementById('status');
+    const manualBtn = document.getElementById('manualBtn');
 
     let currentStream = null;
     let lastProcessedToken = null;
+    let captured = false;
 
     function setStatus(msg) { statusEl.textContent = msg; }
 
@@ -36,7 +44,7 @@
         window.parent.postMessage({
             isStreamlitMessage: true,
             type: 'streamlit:setFrameHeight',
-            height: 440
+            height: 460
         }, '*');
     }
 
@@ -53,13 +61,31 @@
         }
     }
 
+    function waitForVideoReady(maxAttempts) {
+        return new Promise(function (resolve) {
+            let attempts = 0;
+            (function check() {
+                attempts++;
+                if (videoEl.videoWidth && videoEl.videoHeight) {
+                    resolve(true);
+                } else if (attempts >= maxAttempts) {
+                    resolve(false);
+                } else {
+                    setTimeout(check, 100);
+                }
+            })();
+        });
+    }
+
     function capturePhoto() {
+        if (captured) return;
         const w = videoEl.videoWidth;
         const h = videoEl.videoHeight;
         if (!w || !h) {
-            setStatus('Video noch nicht bereit, Aufnahme übersprungen.');
+            setStatus('Video noch nicht bereit - bitte "Jetzt aufnehmen" antippen.');
             return;
         }
+        captured = true;
         canvasEl.width = w;
         canvasEl.height = h;
         canvasEl.getContext('2d').drawImage(videoEl, 0, 0, w, h);
@@ -68,6 +94,10 @@
         setStatus('📸 Foto aufgenommen!');
         sendValue(base64);
     }
+
+    manualBtn.addEventListener('click', function () {
+        capturePhoto();
+    });
 
     async function handleRender(args) {
         const triggerToken = args.trigger_token || '';
@@ -78,7 +108,13 @@
 
         if (triggerToken && triggerToken !== 'none' && triggerToken !== lastProcessedToken) {
             lastProcessedToken = triggerToken;
-            capturePhoto();
+            captured = false;
+            const ready = await waitForVideoReady(50); // bis zu ca. 5s warten
+            if (ready) {
+                capturePhoto();
+            } else {
+                setStatus('Kamera nicht rechtzeitig bereit - bitte "Jetzt aufnehmen" antippen.');
+            }
         }
     }
 
