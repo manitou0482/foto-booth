@@ -8,7 +8,7 @@ import os
 
 import streamlit as st
 
-from modules.state import get_shared_state, get_session_state
+from modules.state import get_shared_state, get_session_state, get_admin_settings
 from modules.ui_components import load_themes, render_title
 from modules import camera_view, display_view
 
@@ -51,6 +51,7 @@ else:
     st.stop()
 
 themes = load_themes()
+admin_settings = get_admin_settings()
 
 st.sidebar.title("⚙️ Admin")
 mode = st.sidebar.radio(
@@ -58,9 +59,16 @@ mode = st.sidebar.radio(
     ["1 Gerät", "2 Geräte"],
 )
 
+camera_label = st.sidebar.radio(
+    "Kamera am Smartphone",
+    ["Rückkamera", "Frontkamera"],
+    index=0 if admin_settings.camera_facing == "environment" else 1,
+)
+admin_settings.camera_facing = "environment" if camera_label == "Rückkamera" else "user"
+
 if mode == "1 Gerät":
     state = get_session_state()
-    camera_view.render(state, themes, all_in_one=True)
+    camera_view.render(state, themes, admin_settings, all_in_one=True)
 
 else:
     state = get_shared_state()
@@ -81,6 +89,6 @@ else:
         st.stop()
 
     elif role == "camera":
-        camera_view.render(state, themes, all_in_one=False)
+        camera_view.render(state, themes, admin_settings, all_in_one=False)
     else:
         display_view.render(state, themes)

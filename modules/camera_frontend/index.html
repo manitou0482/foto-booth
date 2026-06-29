@@ -26,6 +26,7 @@
     const manualBtn = document.getElementById('manualBtn');
 
     let currentStream = null;
+    let currentFacingMode = null;
     let lastProcessedToken = null;
     let captured = false;
 
@@ -48,13 +49,18 @@
         }, '*');
     }
 
-    async function openStream() {
+    async function openStream(facingMode) {
+        if (currentStream) {
+            currentStream.getTracks().forEach(function (t) { t.stop(); });
+            currentStream = null;
+        }
         try {
             currentStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' },
+                video: { facingMode: facingMode },
                 audio: false,
             });
             videoEl.srcObject = currentStream;
+            currentFacingMode = facingMode;
             setStatus('Kamera aktiv.');
         } catch (e) {
             setStatus('Kamera-Fehler: ' + e.message);
@@ -101,9 +107,10 @@
 
     async function handleRender(args) {
         const triggerToken = args.trigger_token || '';
+        const facingMode = args.facing_mode || 'environment';
 
-        if (!currentStream) {
-            await openStream();
+        if (!currentStream || currentFacingMode !== facingMode) {
+            await openStream(facingMode);
         }
 
         if (triggerToken && triggerToken !== 'none' && triggerToken !== lastProcessedToken) {

@@ -30,6 +30,19 @@ class BoothState:
             self.error = None
 
 
+@dataclass
+class AdminSettings:
+    """Globale Admin-Einstellungen - gelten für alle Sessions/Geräte gleich,
+    unabhängig vom gewählten Aufbau (1 oder 2 Geräte), da die physische
+    Kamera-Hardware sich nicht pro Gast ändert."""
+    camera_facing: str = "environment"  # "environment" = Rückkamera, "user" = Frontkamera
+
+
+@st.cache_resource
+def get_admin_settings() -> AdminSettings:
+    return AdminSettings()
+
+
 @st.cache_resource
 def get_shared_state() -> BoothState:
     return BoothState()
