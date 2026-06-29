@@ -1,20 +1,42 @@
-"""Anbindung an die fal.ai API für FLUX.1 [schnell] Image-to-Image.
+"""Anbindung an die fal.ai API für FLUX.1 [dev] Image-to-Image.
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
+
+Hinweis: fal.ai bietet für FLUX.1 [schnell] kein Image-to-Image mit
+Prompt+Strength-Steuerung an (nur eine "Redux"-Variante ohne Textprompt und
+ohne Strength-Parameter). Für unseren Anwendungsfall (Gesicht erhalten,
+Pose/Kleidung/Umgebung per Prompt verändern) brauchen wir daher das
+FLUX.1 [dev] Image-to-Image-Modell, das beide Parameter unterstützt.
 """
+import io
+
 import fal_client
+from PIL import Image
 
 # Fest auf 0.75 eingestellt: Gesichter bleiben originalgetreu, während
 # Pose/Kleidung/Umgebung stark "morphen". Bewusst kein UI-Regler dafür.
 IMAGE_STRENGTH = 0.75
-MODEL_ENDPOINT = "fal-ai/flux/schnell/image-to-image"
+MODEL_ENDPOINT = "fal-ai/flux/dev/image-to-image"
+
+# fal.ai berechnet pro Megapixel des Bildes - wir verkleinern daher vor dem
+# Upload, um Kosten und Verarbeitungszeit vorhersehbar klein zu halten.
+MAX_DIMENSION = 1024
+
+
+def _resize_for_upload(image_bytes: bytes) -> bytes:
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    img.thumbnail((MAX_DIMENSION, MAX_DIMENSION))
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=85)
+    return buf.getvalue()
 
 
 def generate_image(image_bytes: bytes, prompt: str) -> str:
-    """Lädt das Gästefoto zu fal.ai hoch und lässt es per FLUX.1 Schnell
+    """Lädt das Gästefoto zu fal.ai hoch und lässt es per FLUX.1 [dev]
     img2img transformieren. Gibt die URL des Ergebnisbilds zurück."""
-    image_url = fal_client.upload(image_bytes, "image/jpeg")
+    resized_bytes = _resize_for_upload(image_bytes)
+    image_url = fal_client.upload(resized_bytes, "image/jpeg")
 
     result = fal_client.run(
         MODEL_ENDPOINT,
@@ -22,7 +44,7 @@ def generate_image(image_bytes: bytes, prompt: str) -> str:
             "image_url": image_url,
             "prompt": prompt,
             "strength": IMAGE_STRENGTH,
-            "num_inference_steps": 4,
+            "num_inference_steps": 16,
             "enable_safety_checker": True,
         },
     )

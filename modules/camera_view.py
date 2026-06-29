@@ -38,7 +38,7 @@ def _run_capture_flow(state, themes, waiting_message: str):
             st.rerun()
 
     elif state.phase == "processing":
-        with st.spinner("✨ Die KI verwandelt euer Foto... (ca. 2-3 Sekunden)"):
+        with st.spinner("✨ Die KI verwandelt euer Foto... (kann ein paar Sekunden dauern)"):
             theme = next(t for t in themes if t["id"] == state.theme_id)
             try:
                 url = fal_client.generate_image(state.captured_image_bytes, theme["prompt"])
