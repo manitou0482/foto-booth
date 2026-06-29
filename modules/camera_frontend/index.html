@@ -27,16 +27,21 @@
 
     let currentStream = null;
     let currentFacingMode = null;
+    let currentToken = 'none';
     let lastProcessedToken = null;
     let captured = false;
 
     function setStatus(msg) { statusEl.textContent = msg; }
 
-    function sendValue(photoBase64) {
+    function sendValue(photoBase64, token) {
+        // Wert wird zusammen mit dem auslösenden trigger_token gesendet, damit
+        // Python einen veralteten, von Streamlit zwischengespeicherten
+        // Rückgabewert (von einer früheren Aufnahme-Runde) sicher erkennen und
+        // verwerfen kann, statt ihn versehentlich für die neue Runde zu nutzen.
         window.parent.postMessage({
             isStreamlitMessage: true,
             type: 'streamlit:setComponentValue',
-            value: photoBase64,
+            value: { token: token, photo: photoBase64 },
             dataType: 'json'
         }, '*');
     }
@@ -108,7 +113,7 @@
         const dataUrl = canvasEl.toDataURL('image/jpeg', 0.85);
         const base64 = dataUrl.split(',')[1];
         setStatus('📸 Foto aufgenommen!');
-        sendValue(base64);
+        sendValue(base64, currentToken);
     }
 
     manualBtn.addEventListener('click', function () {
@@ -118,6 +123,7 @@
     async function handleRender(args) {
         const triggerToken = args.trigger_token || '';
         const facingMode = args.facing_mode || 'environment';
+        currentToken = triggerToken;
 
         if (!currentStream || currentFacingMode !== facingMode) {
             await openStream(facingMode);
