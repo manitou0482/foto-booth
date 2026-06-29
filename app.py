@@ -1,18 +1,18 @@
-"""Wunderbox – Streamlit-Einstiegspunkt.
+"""Wonderbox – Streamlit-Einstiegspunkt.
 
-Routing: Sidebar-Admin-Schalter wählt Modus 1 (All-in-One) oder Modus 2
-(Zwei-Geräte-Station). In Modus 2 wählt jedes Gerät seine Rolle über den
-URL-Query-Parameter ?role=camera bzw. ?role=display.
+Routing: Sidebar-Admin-Schalter wählt "1 Gerät" (All-in-One) oder
+"2 Geräte" (Kamera + Bildschirm getrennt). Bei 2 Geräten wählt jedes Gerät
+seine Rolle über den URL-Query-Parameter ?role=camera bzw. ?role=display.
 """
 import os
 
 import streamlit as st
 
 from modules.state import get_shared_state, get_session_state
-from modules.ui_components import load_themes
+from modules.ui_components import load_themes, render_title
 from modules import camera_view, display_view
 
-st.set_page_config(page_title="Wunderbox", page_icon="✨", layout="wide")
+st.set_page_config(page_title="Wonderbox", page_icon="✨", layout="wide")
 
 # PRELIGN-CI: Dunkelviolett (#2A1538) + Gold (#D4B05A), abgerundete Formen.
 st.markdown(
@@ -54,11 +54,11 @@ themes = load_themes()
 
 st.sidebar.title("⚙️ Admin")
 mode = st.sidebar.radio(
-    "Betriebsmodus",
-    ["Modus 1: All-in-One", "Modus 2: Zwei-Geräte-Station"],
+    "Aufbau",
+    ["1 Gerät", "2 Geräte"],
 )
 
-if mode.startswith("Modus 1"):
+if mode == "1 Gerät":
     state = get_session_state()
     camera_view.render(state, themes, all_in_one=True)
 
@@ -67,15 +67,15 @@ else:
     role = st.query_params.get("role")
 
     if role not in ("camera", "display"):
-        st.title("✨ Wunderbox")
-        st.write("Welche Rolle übernimmt dieses Gerät?")
+        render_title()
+        st.markdown("<p style='text-align:center;'>Was ist das hier?</p>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("📷 Ich bin die Kamera (Smartphone)", use_container_width=True):
+            if st.button("📷 Kamera", use_container_width=True):
                 st.query_params["role"] = "camera"
                 st.rerun()
         with col2:
-            if st.button("🖥️ Ich bin die Anzeige (Tablet)", use_container_width=True):
+            if st.button("🖥️ Bildschirm", use_container_width=True):
                 st.query_params["role"] = "display"
                 st.rerun()
         st.stop()

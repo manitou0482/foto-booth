@@ -15,6 +15,14 @@ def load_themes():
         return json.load(f)
 
 
+def render_title():
+    """Zentrierter App-Titel, einheitlich auf allen Bildschirmen."""
+    st.markdown(
+        "<h1 style='text-align:center; color:#D4B05A; margin-bottom:0.2em;'>✨ Wonderbox</h1>",
+        unsafe_allow_html=True,
+    )
+
+
 def render_theme_picker(themes, on_select):
     """Zeigt die Themen als Grid aus Buttons. Ruft on_select(theme_id) auf.
 
@@ -83,24 +91,21 @@ def render_result(result_url: str):
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        st.image(result_url, caption="Dein KI-Foto", use_container_width=True)
+        st.image(result_url, caption="Dein Foto", use_container_width=True)
 
     with col2:
-        st.write("📱 Scanne, um dein Foto herunterzuladen:")
+        st.write("📱 Foto herunterladen")
         qr_png = make_qr_png(result_url)
         st.image(qr_png, width=220)
 
-        if st.button("Foto drucken 🖨️", use_container_width=True):
+        if st.button("🖨️ Drucken", use_container_width=True):
             st.components.v1.html("<script>window.print();</script>", height=0)
-            st.info(
-                "Druckdialog wurde geöffnet (falls dein Browser das unterstützt). "
-                "Wähle dort den Canon Selphy CP1200 im WLAN aus."
-            )
+            st.info("Druckdialog geöffnet - Drucker auswählen.")
 
-        share_text = urllib.parse.quote(f"Schau dir mein Wunderbox-Bild an: {result_url}")
-        st.link_button("📲 Per WhatsApp teilen", f"https://wa.me/?text={share_text}", use_container_width=True)
+        share_text = urllib.parse.quote(f"Mein Wonderbox-Bild: {result_url}")
+        st.link_button("📲 WhatsApp", f"https://wa.me/?text={share_text}", use_container_width=True)
         st.link_button(
-            "📧 Per E-Mail teilen",
-            f"mailto:?subject=Mein%20Wunderbox-Bild&body={share_text}",
+            "📧 E-Mail",
+            f"mailto:?subject=Mein%20Wonderbox-Bild&body={share_text}",
             use_container_width=True,
         )

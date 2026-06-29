@@ -11,23 +11,23 @@ def _start_theme(state, theme_id):
 
 
 def render(state, themes):
-    st.title("✨ Wunderbox")
+    ui_components.render_title()
     st_autorefresh(interval=1500, key="display_poll")
 
     if state.phase == "idle":
         ui_components.render_theme_picker(themes, on_select=lambda tid: _start_theme(state, tid))
 
     elif state.phase in ("theme_selected", "countdown", "captured_ready"):
-        st.info("📷 Schau in die Kamera oben in der Box! Countdown läuft dort gerade...")
+        st.info("📷 Schau in die Kamera!")
 
     elif state.phase == "processing":
-        st.info("✨ Die KI verwandelt euer Foto, einen Moment...")
+        st.info("✨ Einen Moment...")
 
     elif state.phase == "result":
         if state.error:
-            st.error(f"Fehler bei der KI-Generierung: {state.error}")
+            st.error(f"Fehler: {state.error}")
         else:
             ui_components.render_result(state.result_image_url)
-        if st.button("🔄 Nächste Gäste / Neue Runde"):
+        if st.button("🔄 Nächste Runde"):
             state.reset()
             st.rerun()

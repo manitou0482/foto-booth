@@ -29,11 +29,11 @@ def _run_capture_flow(state, themes, waiting_message: str):
 
     elif state.phase == "theme_selected":
         st.markdown(
-            "<h2 style='text-align:center;'>📸 Alle bereit?</h2>"
-            "<p style='text-align:center;'>Stellt euch in Position - dann auf den Button tippen.</p>",
+            "<h2 style='text-align:center;'>📸 Bereit?</h2>"
+            "<p style='text-align:center;'>Stellt euch auf und tippt los!</p>",
             unsafe_allow_html=True,
         )
-        if st.button("✅ Jetzt Foto machen!", use_container_width=True, type="primary"):
+        if st.button("📸 Foto machen!", use_container_width=True, type="primary"):
             state.phase = "countdown"
             st.rerun()
 
@@ -72,7 +72,7 @@ def _run_capture_flow(state, themes, waiting_message: str):
 
 
 def _render_all_in_one(state, themes):
-    st.title("✨ Wunderbox")
+    ui_components.render_title()
 
     if state.phase == "idle":
         ui_components.render_theme_picker(themes, on_select=lambda tid: _start_theme(state, tid))
@@ -85,7 +85,7 @@ def _render_all_in_one(state, themes):
 
 
 def _render_camera_role(state, themes):
-    st.title("✨ Wunderbox")
+    ui_components.render_title()
 
     # Nur im Leerlauf pollen: Sobald ein Thema gewählt wurde, treibt sich der
     # Ablauf über die eigenen st.rerun()-Aufrufe selbst voran (Bereit-Check,
@@ -95,10 +95,10 @@ def _render_camera_role(state, themes):
     if state.phase == "idle":
         st_autorefresh(interval=1500, key="camera_poll")
 
-    _run_capture_flow(state, themes, waiting_message="Warte auf Themenauswahl am Tablet...")
+    _run_capture_flow(state, themes, waiting_message="Warte auf Themenwahl...")
 
     if state.phase == "result":
-        st.success("Fertig! Das Ergebnis erscheint auch auf dem Tablet.")
-        if st.button("🔄 Bereit für die nächsten Gäste"):
+        st.success("Fertig! Ergebnis auch auf dem Bildschirm.")
+        if st.button("🔄 Nächste Runde"):
             state.reset()
             st.rerun()
