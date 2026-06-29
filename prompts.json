@@ -3,120 +3,140 @@
     "id": "dino_ritt",
     "label": "🦕 Dino-Ritt (Test-Standard)",
     "prompt": "The people from the photo, now riding rittlings on the back of a massive, friendly green dinosaur through a prehistoric Jurassic jungle, {ACTION}. Their modern outfits are transformed into vintage explorer clothing, safari shirts, and khaki adventure gear; any items in their hands become glowing explorer torches, weathered wooden walking sticks, or ancient dinosaur bones. Dense tropical jungle with giant ferns and ancient trees surrounds them, dramatic sun rays cutting through the canopy. Warm natural sunlight, golden-hour glow. Shot on a Canon EOS R5, 35mm lens, f/2.8, cinematic action photography, sharp focus on the faces, photorealistic detail.",
-    "preview": "assets/previews/dino_ritt.jpg"
+    "preview": "assets/previews/dino_ritt.jpg",
+    "short_label": "Dinosaurier"
   },
   {
     "id": "astronaut",
     "label": "🚀 Astronaut (Weltall-Reise)",
     "prompt": "The person from the photo, wearing a detailed high-tech NASA astronaut spacesuit with helmet, floating inside the International Space Station and looking directly into the camera with a joyful expression. Through the large helmet visor, the blue planet Earth is visibly reflecting. Cosmic starlight outside the window, soft blue-white console lighting. Shot on a Hasselblad H6D, 35mm lens, f/2, photorealistic, sharp focus, cinematic medium shot with visible upper body and arms.",
-    "preview": "assets/previews/astronaut.jpg"
+    "preview": "assets/previews/astronaut.jpg",
+    "short_label": "Astronaut"
   },
   {
     "id": "cyberpunk",
     "label": "🌆 Cyberpunk (Zukunfts-Held)",
     "prompt": "The person from the photo, standing confidently in a rain-slicked neon-lit alleyway of Neo-Tokyo at night, looking straight at the camera. Their clothes are transformed into a high-tech dark leather jacket with glowing cyan and magenta LED fiber optics. Wet pavement reflects neon signs and holographic advertisements in the blurry background, atmospheric volumetric fog drifting through the scene. Vibrant magenta and cyan neon lighting on the face. Shot on a Sony A7IV, 50mm lens, f/1.8, cinematic night photography, photorealistic skin detail.",
-    "preview": "assets/previews/cyberpunk.jpg"
+    "preview": "assets/previews/cyberpunk.jpg",
+    "short_label": "Cyberpunk"
   },
   {
     "id": "medieval_knight",
     "label": "🛡️ Medieval Knight (Ritterrüstung)",
     "prompt": "The person from the photo, transformed into a heroic medieval knight wearing detailed, polished steel plate armor with intricate engravings, facing the camera with a confident, proud smile. Standing in the stone courtyard of an ancient fantasy castle during golden hour. Warm low sun flares through the archways, dramatic side lighting on the armor. Shot on a Canon EOS R5, 85mm lens, f/2, photorealistic, sharp focus, cinematic medium shot.",
-    "preview": "assets/previews/medieval_knight.jpg"
+    "preview": "assets/previews/medieval_knight.jpg",
+    "short_label": "Ritter"
   },
   {
     "id": "pop_art_comic",
     "label": "🎨 Pop-Art Comic (Kunstfilter)",
     "prompt": "The person from the photo, keeping their exact facial expression and pose, redrawn as a stylish modern comic book illustration in pop-art style inspired by Roy Lichtenstein. Bold clean ink outlines, vibrant halftone dot shading, saturated primary colors. Background stylized into a colorful abstract comic scene with retro explosive shapes. Flat even studio lighting, sharp graphic edges. Professional digital illustration, sharp focus, high contrast.",
-    "preview": "assets/previews/pop_art_comic.jpg"
+    "preview": "assets/previews/pop_art_comic.jpg",
+    "short_label": "Pop Art"
   },
   {
     "id": "pirate_captain",
     "label": "🏴‍☠️ Pirate Captain (Piraten-Kapitän)",
     "prompt": "The person from the photo, grinning confidently directly at the camera as a legendary pirate captain, wind blowing through their hair. Wearing a weathered tricorn hat, an ornate captain's coat, a ruffled white shirt, and a leather belt; any items in their hands become an antique cutlass or a glowing lantern. Standing on the wooden deck of a galleon ship at sunset, stormy ocean waves behind them. Warm golden backlight, dramatic low sun. Shot on a Canon EOS R5, 35mm lens, f/2.8, cinematic action photography, photorealistic detail.",
-    "preview": "assets/previews/pirate_captain.jpg"
+    "preview": "assets/previews/pirate_captain.jpg",
+    "short_label": "Pirat"
   },
   {
     "id": "wild_west_sheriff",
     "label": "🤠 Wild West Sheriff (Wildwest-Sheriff)",
     "prompt": "The person from the photo, standing confidently with a determined expression as a tough Wild West sheriff, looking directly at the camera. Wearing a leather vest, a sheriff's star badge, a wide-brimmed cowboy hat, and a red bandana; any modern items in their hands become an old revolver or a coiled lasso rope. Dusty frontier town main street behind them, wooden saloon buildings. Warm golden-hour sunlight, long shadows. Shot on a Canon EOS R5, 50mm lens, f/2, photorealistic, cinematic western photography.",
-    "preview": "assets/previews/wild_west_sheriff.jpg"
+    "preview": "assets/previews/wild_west_sheriff.jpg",
+    "short_label": "Wildwest"
   },
   {
     "id": "viking_warrior",
     "label": "⚔️ Viking Warrior (Wikinger-Krieger)",
     "prompt": "The person from the photo, standing powerful and proud as a fierce Viking warrior, looking directly at the camera. Wearing fur-lined leather armor with braided rope details and a wolf-fur helmet; any items in their hands become a battle axe or a round wooden shield carved with runes. Misty fjord landscape behind them, longships on the water, stormy skies overhead. Cool overcast light with a hint of golden rim light. Shot on a Sony A7IV, 35mm lens, f/2.8, cinematic epic photography, sharp focus on the face.",
-    "preview": "assets/previews/viking_warrior.jpg"
+    "preview": "assets/previews/viking_warrior.jpg",
+    "short_label": "Wikinger"
   },
   {
     "id": "superhero",
     "label": "🦸 Superhero (Superheld)",
     "prompt": "The person from the photo, standing in a heroic pose and looking confidently at the camera as if ready for action, transformed into a powerful superhero wearing a sleek futuristic suit with a flowing cape and a glowing emblem on the chest. Dramatic city skyline behind them at dusk, dynamic light streaks across the clouds. Strong rim lighting from the city lights, cinematic blue-orange color grading. Shot on a Canon EOS R5, 35mm lens, f/2.8, dynamic action photography, photorealistic detail.",
-    "preview": "assets/previews/superhero.jpg"
+    "preview": "assets/previews/superhero.jpg",
+    "short_label": "Superheld"
   },
   {
     "id": "mermaid_underwater",
     "label": "🧜 Mermaid / Underwater World (Meerjungfrau)",
     "prompt": "The person from the photo, gracefully floating underwater as a mythical mermaid or merman, hair flowing weightlessly, expression joyful and serene, looking toward the camera. Lower body and clothing transformed into a shimmering, iridescent fish tail and a seashell-inspired top. Vibrant coral reef surrounding them, schools of colorful fish in the background. Sunlight rays piercing through clear turquoise water from above. Shot with an underwater housing, 24mm lens, f/4, photorealistic, sharp focus on the face, soft caustic light patterns.",
-    "preview": "assets/previews/mermaid_underwater.jpg"
+    "preview": "assets/previews/mermaid_underwater.jpg",
+    "short_label": "Meerjungfrau"
   },
   {
     "id": "renaissance_royalty",
     "label": "👑 Renaissance Royalty (Renaissance-Königshof)",
     "prompt": "The person from the photo, sitting with regal, composed posture as Renaissance-era royalty, looking elegantly at the camera. Wearing a richly embroidered velvet gown or doublet with ornate golden jewelry and a delicate jeweled crown. Grand palace hall behind them, classical paintings, golden chandeliers, heavy drapery. Warm painterly candlelight from the side. Shot on a Hasselblad H6D, 80mm lens, f/2.5, photorealistic portrait photography, fine fabric and skin detail.",
-    "preview": "assets/previews/renaissance_royalty.jpg"
+    "preview": "assets/previews/renaissance_royalty.jpg",
+    "short_label": "Königshof"
   },
   {
     "id": "gatsby_1920s",
     "label": "🥂 Roaring Twenties Gatsby Glam (1920er)",
     "prompt": "The person from the photo, posing confidently with a charming smile as a stylish 1920s Gatsby-era socialite, looking directly at the camera. Wearing an elegant sequined flapper dress with a feather headband, or a sharp pinstripe suit with a fedora hat. Opulent Art Deco ballroom behind them, golden light fixtures, champagne glasses, confetti drifting in the air. Warm golden ballroom lighting, soft glow. Shot on a Canon EOS R5, 50mm lens, f/2, cinematic photography, photorealistic detail.",
-    "preview": "assets/previews/gatsby_1920s.jpg"
+    "preview": "assets/previews/gatsby_1920s.jpg",
+    "short_label": "Goldene Zwanziger"
   },
   {
     "id": "anime_hero",
     "label": "🌸 Anime Hero (Anime-Stil-Held)",
     "prompt": "The person from the photo, keeping their exact pose and energy, redrawn as a heroic anime protagonist with bold clean line art, large expressive eyes, and a dynamic flowing hairstyle. Wearing a stylized modern adventurer outfit with dramatic flowing fabric. Energetic action background with speed lines and glowing magical effects. Vibrant saturated colors, dramatic anime lighting with strong rim light. Professional digital anime illustration, sharp clean lines, high detail.",
-    "preview": "assets/previews/anime_hero.jpg"
+    "preview": "assets/previews/anime_hero.jpg",
+    "short_label": "Anime"
   },
   {
     "id": "safari_adventure",
     "label": "🦁 Safari Adventure (Safari-Abenteuer)",
     "prompt": "The person from the photo, looking excited and adventurous directly at the camera as an explorer on safari. Wearing khaki safari gear, a wide-brimmed explorer hat, and sturdy hiking boots; any modern items in their hands become binoculars or a worn leather field journal. Golden African savanna behind them at sunset, acacia trees, distant wildlife silhouettes. Warm low golden-hour sunlight, long shadows. Shot on a Canon EOS R5, 50mm lens, f/2, photorealistic travel photography, sharp focus on the face.",
-    "preview": "assets/previews/safari_adventure.jpg"
+    "preview": "assets/previews/safari_adventure.jpg",
+    "short_label": "Safari"
   },
   {
     "id": "winter_wonderland_santa",
     "label": "🎄 Winter Wonderland / Santa (Weihnachten)",
     "prompt": "The person from the photo, smiling warmly and waving at the camera, dressed in a cozy red and white Santa-inspired outfit with fluffy white trim, snow falling gently around them. Magical winter wonderland village behind them, twinkling fairy lights, decorated pine trees, a cozy snow-covered cabin. Soft warm golden light mixed with cool blue snow tones. Shot on a Canon EOS R5, 50mm lens, f/2, photorealistic festive photography, sharp focus on the face.",
-    "preview": "assets/previews/winter_wonderland_santa.jpg"
+    "preview": "assets/previews/winter_wonderland_santa.jpg",
+    "short_label": "Weihnachten"
   },
   {
     "id": "tropical_beach_paradise",
     "label": "🏖️ Tropical Beach Paradise (Strandparadies)",
     "prompt": "The person from the photo, smiling happily directly at the camera as a relaxed tropical paradise traveler. Wearing a colorful Hawaiian shirt or breezy summer outfit with a flower lei or sun hat; any modern items in their hands become a fresh tropical cocktail with a paper umbrella. Stunning turquoise beach behind them, white sand, palm trees, vivid sunset sky. Warm golden-hour backlight, soft orange glow. Shot on a Canon EOS R5, 35mm lens, f/2.8, photorealistic vacation photography, sharp focus on the face.",
-    "preview": "assets/previews/tropical_beach_paradise.jpg"
+    "preview": "assets/previews/tropical_beach_paradise.jpg",
+    "short_label": "Strand"
   },
   {
     "id": "disco_70s",
     "label": "🕺 Disco 70s Glam (70er-Disco)",
     "prompt": "The person from the photo, striking a confident, fun dance pose and looking at the camera as a glamorous 1970s disco icon. Wearing a shiny sequined jumpsuit or flared bell-bottoms with a bold patterned shirt, big collar, and platform shoes. Colorful retro disco dance floor behind them, a glowing mirror ball, neon light beams. Vibrant saturated multicolor lighting, dramatic dance-floor glow. Shot on a Sony A7IV, 35mm lens, f/2, cinematic photography, photorealistic detail.",
-    "preview": "assets/previews/disco_70s.jpg"
+    "preview": "assets/previews/disco_70s.jpg",
+    "short_label": "Disco"
   },
   {
     "id": "scifi_mech_pilot",
     "label": "🤖 Sci-Fi Mech Pilot (Mech-Pilot)",
     "prompt": "The person from the photo, looking determined and confident directly at the camera as an elite sci-fi mech pilot. Wearing a sleek high-tech flight suit with glowing blue circuit details and a futuristic chest plate. Open cockpit of a massive futuristic robot mech inside a hangar bay behind them, holographic control displays glowing nearby. Cool blue ambient light mixed with warm console glow. Shot on a Canon EOS R5, 35mm lens, f/2, cinematic sci-fi photography, photorealistic detail.",
-    "preview": "assets/previews/scifi_mech_pilot.jpg"
+    "preview": "assets/previews/scifi_mech_pilot.jpg",
+    "short_label": "Roboter"
   },
   {
     "id": "fairy_tale_forest",
     "label": "🧝 Enchanted Fairy Tale Forest (Märchenwald)",
     "prompt": "The person from the photo, smiling softly and looking gently enchanted toward the camera as a magical forest elf or fairy tale character. Wearing an elegant woodland outfit made of soft fabrics, leaves, and vines, with delicate pointed ears. Glowing enchanted forest behind them, magical floating lights, ancient mossy trees, soft mystical fog. Dreamy soft backlight filtering through the trees, gentle golden-green glow. Shot on a Canon EOS R5, 50mm lens, f/1.8, cinematic fantasy photography, photorealistic skin detail.",
-    "preview": "assets/previews/fairy_tale_forest.jpg"
+    "preview": "assets/previews/fairy_tale_forest.jpg",
+    "short_label": "Märchenwald"
   },
   {
     "id": "egyptian_pharaoh",
     "label": "🏺 Ancient Egyptian Pharaoh (Pharao)",
     "prompt": "The person from the photo, holding a regal, powerful pose and looking directly at the camera as an ancient Egyptian pharaoh or queen. Wearing a golden ornate headdress, a wide jeweled collar necklace, and flowing white linen robes. Grand desert temple behind them, massive stone hieroglyph-covered columns, pyramids visible at golden hour. Warm dramatic low sun, long desert shadows. Shot on a Canon EOS R5, 50mm lens, f/2, photorealistic cinematic photography, sharp focus on the face.",
-    "preview": "assets/previews/egyptian_pharaoh.jpg"
+    "preview": "assets/previews/egyptian_pharaoh.jpg",
+    "short_label": "Pharao"
   }
 ]

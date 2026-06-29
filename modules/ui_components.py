@@ -31,7 +31,7 @@ def render_theme_picker(themes, on_select):
                 preview_path = theme.get("preview")
                 if preview_path:
                     st.image(preview_path, use_container_width=True)
-                if st.button(theme["label"], key=f"theme_{theme['id']}", use_container_width=True):
+                if st.button("Auswählen", key=f"theme_{theme['id']}", use_container_width=True):
                     on_select(theme["id"])
                     st.rerun()
 
