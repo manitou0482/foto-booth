@@ -14,15 +14,24 @@ Gästefotos ermittelt, siehe Konversation):
   strukturelle Grenze, kein Prompt-Problem, und kein Gewichts-Wert behebt das.
 - Lösung: Pose-Generierung und Gesichts-Identität werden in zwei
   unabhängige Schritte aufgeteilt (vermutlich macht Touchpix das ähnlich):
-  1) FLUX.1 Kontext [pro] erzeugt die Szene (Pose, Kleidung, Hintergrund)
-     mit voller kreativer Freiheit - OHNE Identitäts-Zwang, der die Pose
-     ohnehin nur einschränkt, ohne zuverlässig zu wirken.
+  1) Ein Edit-Modell erzeugt die Szene (Pose, Kleidung, Hintergrund) mit
+     voller kreativer Freiheit - OHNE Identitäts-Zwang, der die Pose ohnehin
+     nur einschränkt, ohne zuverlässig zu wirken.
   2) fal-ai/face-swap setzt das ECHTE Gesicht aus dem Originalfoto auf das
      generierte Bild. Face-Swap-Modelle sind speziell darauf trainiert,
      ein Gesicht auf eine andere Kopf-/Körperhaltung zu übertragen - das ist
      robuster als Identität "by prompt" zu erzwingen. Ein einzelner Aufruf
      mit dem ganzen Gruppenfoto als Quelle und Ziel tauscht dabei empirisch
      bestätigt auch bei 2 Personen beide Gesichter korrekt positionsweise.
+- Geschwindigkeit (empirisch verglichen): `fal-ai/flux-2/edit` erzeugt die
+  Szene in ca. 6-7s (8 Inferenzschritte), `fal-ai/flux-pro/kontext` braucht
+  ca. 15s (50 Schritte) bei vergleichbarer Qualität - deshalb aktuell im
+  Einsatz. Eine zusätzlich getestete Variante mit zwei Civitai-LoRAs über
+  `fal-ai/flux-general` (Text-zu-Bild ohne Foto-Input) war mit 24-31s sogar
+  LANGSAMER (vermutlich durch das Laden der ~300MB-LoRA-Dateien) und nicht
+  erkennbar besser in der Qualität - deshalb nicht übernommen. Der größte
+  verbleibende Zeitfaktor ist inzwischen der Face-Swap-Schritt selbst
+  (variabel 3-30s je nach Auslastung), der bisher nicht weiter optimiert ist.
 """
 import io
 import random
@@ -30,11 +39,9 @@ import random
 import fal_client
 from PIL import Image
 
-SCENE_MODEL_ENDPOINT = "fal-ai/flux-pro/kontext"
+SCENE_MODEL_ENDPOINT = "fal-ai/flux-2/edit"
 FACE_SWAP_ENDPOINT = "fal-ai/face-swap"
 PERSON_DETECTION_ENDPOINT = "fal-ai/moondream2/object-detection"
-
-GUIDANCE_SCALE = 3.5
 
 # Themen-Prompts können den Platzhalter {ACTION} enthalten, der bei jeder
 # Generierung durch eine zufällig gewählte, zum Thema passende Pose/Aktion
@@ -500,8 +507,7 @@ def generate_image(image_bytes: bytes, prompt: str, theme_id: str) -> str:
         SCENE_MODEL_ENDPOINT,
         arguments={
             "prompt": _build_prompt(prompt, num_people),
-            "image_url": image_url,
-            "guidance_scale": GUIDANCE_SCALE,
+            "image_urls": [image_url],
         },
     )
     scene_url = scene_result["images"][0]["url"]
