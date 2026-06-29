@@ -23,15 +23,23 @@ Gästefotos ermittelt, siehe Konversation):
      robuster als Identität "by prompt" zu erzwingen. Ein einzelner Aufruf
      mit dem ganzen Gruppenfoto als Quelle und Ziel tauscht dabei empirisch
      bestätigt auch bei 2 Personen beide Gesichter korrekt positionsweise.
-- Geschwindigkeit (empirisch verglichen): `fal-ai/flux-2/edit` erzeugt die
-  Szene in ca. 6-7s (8 Inferenzschritte), `fal-ai/flux-pro/kontext` braucht
-  ca. 15s (50 Schritte) bei vergleichbarer Qualität - deshalb aktuell im
-  Einsatz. Eine zusätzlich getestete Variante mit zwei Civitai-LoRAs über
-  `fal-ai/flux-general` (Text-zu-Bild ohne Foto-Input) war mit 24-31s sogar
-  LANGSAMER (vermutlich durch das Laden der ~300MB-LoRA-Dateien) und nicht
-  erkennbar besser in der Qualität - deshalb nicht übernommen. Der größte
-  verbleibende Zeitfaktor ist inzwischen der Face-Swap-Schritt selbst
-  (variabel 3-30s je nach Auslastung), der bisher nicht weiter optimiert ist.
+- Geschwindigkeit (empirisch verglichen): `fal-ai/flux-2/edit` (Bild-Input,
+  8 Schritte) erzeugt die Szene in ca. 6-7s, `fal-ai/flux-pro/kontext`
+  braucht ca. 15s (50 Schritte) bei vergleichbarer Qualität.
+  `fal-ai/flux-general` mit LoRAs UND Bild-Input war bei gleicher
+  Schrittzahl auffällig langsam (~24-26s, vermutlich teurerer Pfad für
+  Bild-Konditionierung); OHNE Bild-Input (reines Text-zu-Bild) bei 8
+  Schritten dagegen nur ~5-6s - genauso schnell wie flux-2/edit. Da die
+  Gesichts-Identität ohnehin erst durch Schritt 2 (Face-Swap) entsteht,
+  braucht Schritt 1 das Originalfoto inhaltlich nicht - außer bei
+  Pop-Art-Comic/Anime-Hero, die laut eigenem Prompt explizit die exakte
+  Pose/den Ausdruck des Originalfotos übernehmen sollen (Stil-Transfer,
+  kein neu generiertes Motiv) und deshalb weiterhin `flux-2/edit` mit
+  Bild-Input nutzen. Alle anderen Themen laufen über `fal-ai/flux-general`
+  (Text-zu-Bild) mit thema-passenden LoRAs (siehe LORA_CONFIG) für mehr
+  Fotorealismus. Der größte verbleibende Zeitfaktor ist der Face-Swap-
+  Schritt selbst (variabel 3-30s je nach Auslastung), bisher nicht
+  optimiert.
 """
 import io
 import random
@@ -39,9 +47,29 @@ import random
 import fal_client
 from PIL import Image
 
-SCENE_MODEL_ENDPOINT = "fal-ai/flux-2/edit"
+SCENE_EDIT_ENDPOINT = "fal-ai/flux-2/edit"  # Bild-Input, für Pop-Art/Anime (Pose-Erhalt)
+SCENE_LORA_ENDPOINT = "fal-ai/flux-general"  # Text-zu-Bild + LoRAs, für alle anderen Themen
 FACE_SWAP_ENDPOINT = "fal-ai/face-swap"
 PERSON_DETECTION_ENDPOINT = "fal-ai/moondream2/object-detection"
+
+# Themen, die bewusst die exakte Original-Pose/den Original-Ausdruck per
+# Stil-Transfer übernehmen (kein neu generiertes Motiv) - brauchen das echte
+# Foto als Bild-Input und bleiben daher bei SCENE_EDIT_ENDPOINT.
+IMAGE_BASED_THEMES = {"pop_art_comic", "anime_hero"}
+
+# Civitai-LoRAs (beide FLUX.1-[dev]-kompatibel, vom Nutzer bereitgestellt).
+# Photorealismus-LoRA gilt für alle Themen außer den beiden oben (die sollen
+# ja bewusst NICHT realistisch, sondern stilisiert aussehen). Die
+# Dinosaurier-LoRA gilt nur für das Dino-Ritt-Thema.
+PHOTOREALISM_LORA = {
+    "path": "https://civitai.com/api/download/models/2590775?fileId=2478346",
+    "scale": 0.45,
+}
+DINO_LORA = {
+    "path": "https://civitai.com/api/download/models/1192189?fileId=1097470",
+    "scale": 0.80,
+}
+LORA_INFERENCE_STEPS = 8
 
 # Themen-Prompts können den Platzhalter {ACTION} enthalten, der bei jeder
 # Generierung durch eine zufällig gewählte, zum Thema passende Pose/Aktion
@@ -456,17 +484,21 @@ def _build_prompt(prompt: str, num_people: int) -> str:
     von diesem Schritt erzeugt, sondern in Schritt 2 (Face-Swap) ersetzt -
     dieser Schritt darf sich daher voll auf Pose/Kleidung/Hintergrund
     konzentrieren, ohne durch einen Identitäts-Zwang eingeschränkt zu sein."""
+    # Bewusst als Anweisung an das AUSGABEBILD formuliert ("Generate exactly
+    # ...") statt als Aussage über ein Referenzfoto ("There is ... in the
+    # reference photo") - funktioniert so für beide Szene-Pfade gleich, auch
+    # für den LoRA-Text-zu-Bild-Pfad, der gar kein Foto als Input bekommt.
     if num_people <= 1:
         prompt = prompt.replace("The people from the photo", "The person from the photo")
         count_clause = (
-            "There is exactly 1 person in the reference photo. Show only that ONE "
-            "person in the new image - do not duplicate them or add extra people. "
+            "Generate exactly ONE person in the new image - do not duplicate them "
+            "or add extra people. "
         )
     else:
         prompt = prompt.replace("The person from the photo", "The people from the photo")
         count_clause = (
-            f"There are {num_people} people in the reference photo. Include ALL of them "
-            f"in the new image, each in their own distinct pose. "
+            f"Generate exactly {num_people} people in the new image, each in their "
+            f"own distinct pose. "
         )
 
     # Kleidung soll zum jeweiligen Geschlecht passen statt einer festen
@@ -489,10 +521,51 @@ def _build_prompt(prompt: str, num_people: int) -> str:
     return gender_clause + visibility_clause + count_clause + prompt
 
 
+def _generate_scene(prompt: str, theme_id: str, image_url: str) -> str:
+    """Schritt 1: erzeugt die themenpassende Szene und gibt deren Bild-URL
+    zurück. Zwei Pfade, je nach Thema (siehe Modul-Docstring):
+    - Pop-Art-Comic/Anime-Hero: flux-2/edit mit dem Originalfoto als
+      Bild-Input (übernimmt exakt dessen Pose/Ausdruck per Stil-Transfer).
+    - Alle anderen Themen: flux-general als reines Text-zu-Bild mit
+      thema-passenden LoRAs - deutlich schneller, da kein Bild-Input nötig
+      (Identität kommt ohnehin erst aus Schritt 2)."""
+    if theme_id in IMAGE_BASED_THEMES:
+        result = fal_client.run(
+            SCENE_EDIT_ENDPOINT,
+            arguments={"prompt": prompt, "image_urls": [image_url]},
+        )
+        return result["images"][0]["url"]
+
+    # Der LoRA-Pfad bekommt kein Foto als Input (siehe Modul-Docstring) -
+    # "from the photo" im Theme-Text wäre hier ein Bezug auf ein nicht
+    # vorhandenes Bild und wird entfernt. Das Trigger-Wort "r3alism" aktiviert
+    # die Photorealismus-LoRA.
+    prompt = (
+        prompt.replace("The person from the photo", "The person")
+        .replace("The people from the photo", "The people")
+    )
+    prompt = "r3alism, " + prompt
+
+    loras = [PHOTOREALISM_LORA]
+    if theme_id == "dino_ritt":
+        loras.append(DINO_LORA)
+
+    result = fal_client.run(
+        SCENE_LORA_ENDPOINT,
+        arguments={
+            "prompt": prompt,
+            "loras": loras,
+            "image_size": "square_hd",
+            "num_inference_steps": LORA_INFERENCE_STEPS,
+        },
+    )
+    return result["images"][0]["url"]
+
+
 def generate_image(image_bytes: bytes, prompt: str, theme_id: str) -> str:
     """Zwei-Schritt-Pipeline:
-    1) FLUX.1 Kontext erzeugt die themenpassende Szene (Pose/Kleidung/
-       Hintergrund) mit voller kreativer Freiheit aus dem Gästefoto.
+    1) Szene-Modell erzeugt die themenpassende Szene (Pose/Kleidung/
+       Hintergrund) mit voller kreativer Freiheit (siehe _generate_scene).
     2) fal-ai/face-swap setzt das echte Gesicht aus dem Originalfoto auf
        das generierte Bild - das macht die Gesichts-Identität unabhängig
        davon, wie dramatisch die Pose/Verdeckung im jeweiligen Thema ist.
@@ -502,15 +575,9 @@ def generate_image(image_bytes: bytes, prompt: str, theme_id: str) -> str:
 
     num_people = _detect_num_people(image_url)
     prompt = _randomize_action(theme_id, prompt)
+    final_prompt = _build_prompt(prompt, num_people)
 
-    scene_result = fal_client.run(
-        SCENE_MODEL_ENDPOINT,
-        arguments={
-            "prompt": _build_prompt(prompt, num_people),
-            "image_urls": [image_url],
-        },
-    )
-    scene_url = scene_result["images"][0]["url"]
+    scene_url = _generate_scene(final_prompt, theme_id, image_url)
 
     swap_result = fal_client.run(
         FACE_SWAP_ENDPOINT,
