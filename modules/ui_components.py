@@ -67,22 +67,42 @@ def render_auto_capture_trigger():
             const statusEl = document.getElementById('autocap-status');
             function setStatus(msg) { if (statusEl) { statusEl.textContent = msg; } }
 
+            function simulateRealClick(el, win) {
+                const rect = el.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                const base = { bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, view: win };
+                ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'].forEach(function(type) {
+                    const Ctor = type.indexOf('pointer') === 0 ? win.PointerEvent : win.MouseEvent;
+                    try {
+                        el.dispatchEvent(new Ctor(type, base));
+                    } catch (e) {
+                        el.dispatchEvent(new win.MouseEvent(type, base));
+                    }
+                });
+            }
+
             const candidates = ['take photo', 'take a photo', 'capture', 'foto aufnehmen', 'aufnehmen'];
             let attempts = 0;
-            const maxAttempts = 100; // ca. 20s bei 200ms Intervall
+            let clickedOnce = false;
+            const maxAttempts = 150; // ca. 30s bei 200ms Intervall
 
             const interval = setInterval(function() {
                 attempts++;
                 try {
                     const buttons = window.parent.document.querySelectorAll('button');
-                    setStatus('Suche Auslöser... (Versuch ' + attempts + ', ' + buttons.length + ' Buttons gefunden)');
-                    for (const btn of buttons) {
+                    const visible = Array.from(buttons).filter(function(b) {
+                        return b.offsetWidth > 0 && b.offsetHeight > 0 && !b.disabled;
+                    });
+                    setStatus('Suche Auslöser... (Versuch ' + attempts + ', ' + visible.length + ' sichtbare Buttons)');
+                    for (const btn of visible) {
                         const label = ((btn.innerText || '') + ' ' + (btn.getAttribute('aria-label') || '') + ' ' + (btn.title || ''))
                             .trim()
                             .toLowerCase();
                         if (candidates.some(function(c) { return label.includes(c); })) {
-                            btn.click();
-                            setStatus('Auslöser gefunden und geklickt!');
+                            simulateRealClick(btn, window.parent);
+                            clickedOnce = true;
+                            setStatus('Auslöser geklickt (Versuch ' + attempts + '), warte auf Reaktion...');
                             clearInterval(interval);
                             return;
                         }
@@ -93,7 +113,7 @@ def render_auto_capture_trigger():
                     return;
                 }
                 if (attempts >= maxAttempts) {
-                    setStatus('Auslöser nach ' + maxAttempts + ' Versuchen nicht gefunden.');
+                    setStatus(clickedOnce ? 'Geklickt, aber keine Reaktion erkannt.' : 'Auslöser nach ' + maxAttempts + ' Versuchen nicht gefunden.');
                     clearInterval(interval);
                 }
             }, 200);
