@@ -1,4 +1,4 @@
-"""DIY-KI-Fotobox – Streamlit-Einstiegspunkt.
+"""Wunderbox – Streamlit-Einstiegspunkt.
 
 Routing: Sidebar-Admin-Schalter wählt Modus 1 (All-in-One) oder Modus 2
 (Zwei-Geräte-Station). In Modus 2 wählt jedes Gerät seine Rolle über den
@@ -12,7 +12,7 @@ from modules.state import get_shared_state, get_session_state
 from modules.ui_components import load_themes
 from modules import camera_view, display_view
 
-st.set_page_config(page_title="KI-Fotobox", page_icon="📸", layout="wide")
+st.set_page_config(page_title="Wunderbox", page_icon="✨", layout="wide")
 
 # PRELIGN-CI: Dunkelviolett (#2A1538) + Gold (#D4B05A), abgerundete Formen.
 st.markdown(
@@ -67,7 +67,7 @@ else:
     role = st.query_params.get("role")
 
     if role not in ("camera", "display"):
-        st.title("📸 KI-Fotobox – Zwei-Geräte-Modus")
+        st.title("✨ Wunderbox")
         st.write("Welche Rolle übernimmt dieses Gerät?")
         col1, col2 = st.columns(2)
         with col1:

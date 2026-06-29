@@ -72,7 +72,7 @@ def _run_capture_flow(state, themes, waiting_message: str):
 
 
 def _render_all_in_one(state, themes):
-    st.title("📸 KI-Fotobox")
+    st.title("✨ Wunderbox")
 
     if state.phase == "idle":
         ui_components.render_theme_picker(themes, on_select=lambda tid: _start_theme(state, tid))
@@ -85,7 +85,7 @@ def _render_all_in_one(state, themes):
 
 
 def _render_camera_role(state, themes):
-    st.title("📷 Kamera-Station")
+    st.title("✨ Wunderbox")
 
     # Nur im Leerlauf pollen: Sobald ein Thema gewählt wurde, treibt sich der
     # Ablauf über die eigenen st.rerun()-Aufrufe selbst voran (Bereit-Check,

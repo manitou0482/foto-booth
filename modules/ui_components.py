@@ -21,7 +21,6 @@ def render_theme_picker(themes, on_select):
     Die Anzahl der Personen im Foto wird automatisch von fal_client erkannt
     (siehe modules/fal_client.py, _detect_num_people) - keine manuelle
     Auswahl nötig."""
-    st.subheader("Wähle dein Abenteuer ✨")
     cols_per_row = 4
     for i in range(0, len(themes), cols_per_row):
         row = themes[i : i + cols_per_row]
@@ -98,10 +97,10 @@ def render_result(result_url: str):
                 "Wähle dort den Canon Selphy CP1200 im WLAN aus."
             )
 
-        share_text = urllib.parse.quote(f"Schau dir mein KI-Fotobox-Bild an: {result_url}")
+        share_text = urllib.parse.quote(f"Schau dir mein Wunderbox-Bild an: {result_url}")
         st.link_button("📲 Per WhatsApp teilen", f"https://wa.me/?text={share_text}", use_container_width=True)
         st.link_button(
             "📧 Per E-Mail teilen",
-            f"mailto:?subject=Mein%20Fotobox-Bild&body={share_text}",
+            f"mailto:?subject=Mein%20Wunderbox-Bild&body={share_text}",
             use_container_width=True,
         )

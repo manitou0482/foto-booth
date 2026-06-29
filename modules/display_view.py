@@ -11,7 +11,7 @@ def _start_theme(state, theme_id):
 
 
 def render(state, themes):
-    st.title("🎉 Wähle dein Thema")
+    st.title("✨ Wunderbox")
     st_autorefresh(interval=1500, key="display_poll")
 
     if state.phase == "idle":
