@@ -1,5 +1,6 @@
 """Wiederverwendbare UI-Bausteine: Countdown, Theme-Auswahl, QR-Code,
 Druck-Button (window.print()) und Teilen-Buttons (WhatsApp/E-Mail)."""
+import base64
 import io
 import json
 import time
@@ -15,6 +16,25 @@ def load_themes():
         return json.load(f)
 
 
+@st.cache_data
+def _image_data_uri(path: str) -> str:
+    """Liest ein lokales Bild ein und kodiert es als data:-URI, damit es in
+    einen klickbaren <a><img></a>-Link eingebettet werden kann - Streamlit
+    kann lokale Dateipfade sonst nicht direkt als <img src> servieren."""
+    with open(path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("ascii")
+    return f"data:image/jpeg;base64,{encoded}"
+
+
+def _build_href(extra_params: dict) -> str:
+    """Baut einen Link auf die aktuelle Seite, der alle bestehenden
+    Query-Parameter (z.B. ?role=camera in Modus 2) erhält und zusätzlich
+    die übergebenen Parameter setzt."""
+    params = dict(st.query_params)
+    params.update(extra_params)
+    return "?" + urllib.parse.urlencode(params)
+
+
 def render_title():
     """Zentrierter App-Titel, einheitlich auf allen Bildschirmen."""
     st.markdown(
@@ -24,11 +44,20 @@ def render_title():
 
 
 def render_theme_picker(themes, on_select):
-    """Zeigt die Themen als Grid aus Buttons. Ruft on_select(theme_id) auf.
+    """Zeigt die Themen als Grid aus klickbaren Vorschaubildern (kein
+    separater "Auswählen"-Button mehr - ein Tap auf das Bild wählt das
+    Thema direkt). Ruft on_select(theme_id) auf.
 
     Die Anzahl der Personen im Foto wird automatisch von fal_client erkannt
     (siehe modules/fal_client.py, _detect_num_people) - keine manuelle
     Auswahl nötig."""
+    selected_theme = st.query_params.get("selected_theme")
+    if selected_theme:
+        del st.query_params["selected_theme"]
+        on_select(selected_theme)
+        st.rerun()
+        return
+
     cols_per_row = 4
     for i in range(0, len(themes), cols_per_row):
         row = themes[i : i + cols_per_row]
@@ -37,10 +66,14 @@ def render_theme_picker(themes, on_select):
             with col:
                 preview_path = theme.get("preview")
                 if preview_path:
-                    st.image(preview_path, use_container_width=True)
-                if st.button("Auswählen", key=f"theme_{theme['id']}", use_container_width=True):
-                    on_select(theme["id"])
-                    st.rerun()
+                    href = _build_href({"selected_theme": theme["id"]})
+                    data_uri = _image_data_uri(preview_path)
+                    st.markdown(
+                        f'<a href="{href}" target="_self">'
+                        f'<img src="{data_uri}" style="width:100%; border-radius:20px; '
+                        f'cursor:pointer; display:block;"></a>',
+                        unsafe_allow_html=True,
+                    )
 
 
 def render_countdown(seconds: int = 3):
