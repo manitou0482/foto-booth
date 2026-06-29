@@ -70,7 +70,14 @@ def _render_all_in_one(state, themes):
 
 def _render_camera_role(state, themes):
     st.title("📷 Kamera-Station")
-    st_autorefresh(interval=1500, key="camera_poll")
+
+    # Nur im Leerlauf pollen: Sobald ein Thema gewählt wurde, treibt sich der
+    # Ablauf über die eigenen st.rerun()-Aufrufe selbst voran (Countdown,
+    # KI-Verarbeitung). Würde hier weiterhin alle 1,5s automatisch neu
+    # geladen, würde das den mehrere Sekunden dauernden Countdown immer
+    # wieder mitten im Lauf abbrechen und neu starten.
+    if state.phase == "idle":
+        st_autorefresh(interval=1500, key="camera_poll")
 
     _run_capture_flow(state, themes, waiting_message="Warte auf Themenauswahl am Tablet...")
 
