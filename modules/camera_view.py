@@ -44,9 +44,13 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
         st.rerun()
 
     elif state.phase == "captured_ready":
+        # key enthält das Token, damit Streamlit die Komponente jede Runde als
+        # NEUES Widget behandelt - sonst könnte intern noch ein Rückgabewert
+        # einer früheren Runde am alten, gleichbleibenden Key hängen bleiben
+        # und versehentlich für die aktuelle Aufnahme verwendet werden.
         photo_base64 = camera_component.camera_widget(
             trigger_token=state.capture_token,
-            key="booth_camera",
+            key=f"booth_camera_{state.capture_token}",
             facing_mode=admin_settings.camera_facing,
         )
         if photo_base64:
