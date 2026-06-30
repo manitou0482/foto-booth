@@ -40,9 +40,10 @@ async function connect() {
         }
         if (connection === 'close') {
             isConnected = false
-            const code = lastDisconnect?.error?.output?.statusCode
+            const err  = lastDisconnect?.error
+            const code = err?.output?.statusCode
+            console.log(`🔴 Verbindung getrennt – Code: ${code}, Fehler: ${err?.message || err}`)
             const loggedOut = code === DisconnectReason.loggedOut
-            console.log(loggedOut ? '❌ Abgemeldet.' : '🔄 Verbindung unterbrochen, wird neu verbunden...')
             if (!loggedOut) connect()
         }
     })
