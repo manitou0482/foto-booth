@@ -151,3 +151,10 @@ def render_result(result_url: str, input_image_bytes: bytes | None = None):
                 st.success("✅ Gesendet!")
             else:
                 st.error(f"Fehler: {err}")
+
+        share_text = urllib.parse.quote(f"Mein Wonderbox-Bild: {result_url}")
+        st.link_button(
+            "📧 Per E-Mail senden",
+            f"mailto:?subject=Mein%20Wonderbox-Bild&body={share_text}",
+            use_container_width=True,
+        )
