@@ -120,10 +120,7 @@ def make_qr_png(url: str) -> bytes:
 
 
 def render_result(result_url: str, input_image_bytes: bytes | None = None):
-    """Zeigt das Ergebnisbild + QR-Code + Druck-Button + Teilen-Buttons.
-    input_image_bytes (optional): die Original-Aufnahme zum direkten
-    Vergleich - hilfreich zur Fehlersuche, falls das Ergebnis nicht wie
-    erwartet aussieht."""
+    from modules import whatsapp_client
     col1, col2 = st.columns([2, 1])
 
     with col1:
@@ -133,37 +130,24 @@ def render_result(result_url: str, input_image_bytes: bytes | None = None):
                 st.image(input_image_bytes, caption="So wurdest du fotografiert", width=300)
 
     with col2:
-        st.write("📱 Foto herunterladen")
         qr_png = make_qr_png(result_url)
-        st.image(qr_png, width=220)
-
-        if st.button("🖨️ Drucken", use_container_width=True):
-            st.components.v1.html("<script>window.print();</script>", height=0)
-            st.info("Druckdialog geöffnet - Drucker auswählen.")
-
-        share_text = urllib.parse.quote(f"Mein Wonderbox-Bild: {result_url}")
+        st.image(qr_png, use_container_width=True)
 
         phone = st.text_input(
-            "📲 WhatsApp-Nummer (mit Ländervorwahl, z.B. 4915512345678)",
+            "Deine WhatsApp-Nummer",
             key=f"whatsapp_phone_{result_url}",
             placeholder="4915512345678",
         )
         if st.button(
             "📲 Per WhatsApp senden",
             use_container_width=True,
+            type="primary",
             disabled=not phone.strip(),
             key=f"whatsapp_send_{result_url}",
         ):
-            from modules import whatsapp_client
             with st.spinner("Wird gesendet..."):
                 ok, err = whatsapp_client.send_image(phone, result_url)
             if ok:
-                st.success("✅ Foto wurde per WhatsApp gesendet!")
+                st.success("✅ Gesendet!")
             else:
-                st.error(f"WhatsApp-Fehler: {err}")
-
-        st.link_button(
-            "📧 E-Mail",
-            f"mailto:?subject=Mein%20Wonderbox-Bild&body={share_text}",
-            use_container_width=True,
-        )
+                st.error(f"Fehler: {err}")
