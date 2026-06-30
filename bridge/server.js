@@ -4,77 +4,71 @@ const {
     useMultiFileAuthState,
     fetchLatestBaileysVersion,
 } = require('@whiskeysockets/baileys')
-const pino   = require('pino')
-const QRCode = require('qrcode')
+const pino    = require('pino')
 const express = require('express')
 
-const PORT   = process.env.PORT   || 3000
-const SECRET = process.env.BRIDGE_SECRET || 'wonderbox'
+const PORT   = process.env.PORT           || 3000
+const SECRET = process.env.BRIDGE_SECRET  || 'wonderbox'
+const PHONE  = process.env.PHONE_NUMBER   || ''  // z.B. 4915512345678
 
 const app = express()
 app.use(express.json())
 
 let sock        = null
 let isConnected = false
-let currentQR   = null
 
 async function connect() {
     const { state, saveCreds } = await useMultiFileAuthState('wa_session')
     const { version } = await fetchLatestBaileysVersion()
-    console.log(`Verwende WhatsApp-Version: ${version.join('.')}`)
 
     sock = makeWASocket({
         version,
         auth: state,
         logger: pino({ level: 'silent' }),
+        // Pairing-Code-Modus statt QR
+        mobile: false,
     })
+
+    // Pairing Code anfordern falls noch nicht verbunden
+    if (!state.creds.registered && PHONE) {
+        setTimeout(async () => {
+            try {
+                const code = await sock.requestPairingCode(PHONE)
+                console.log('\n╔══════════════════════════════╗')
+                console.log(`║  Pairing Code: ${code}  ║`)
+                console.log('╚══════════════════════════════╝')
+                console.log('\nIn WhatsApp:')
+                console.log('Einstellungen → Verknüpfte Geräte → Gerät hinzufügen')
+                console.log('→ "Mit Telefonnummer verknüpfen" → Code eingeben\n')
+            } catch (e) {
+                console.log('Pairing-Code-Fehler:', e.message)
+            }
+        }, 3000)
+    } else if (!state.creds.registered && !PHONE) {
+        console.log('\n⚠️  PHONE_NUMBER nicht gesetzt!')
+        console.log('Starte mit: PHONE_NUMBER=4915512345678 node server.js\n')
+    }
 
     sock.ev.on('creds.update', saveCreds)
 
-    sock.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
-        if (qr) {
-            currentQR = qr
-            console.log('\n>>> QR-Code bereit!')
-            console.log('>>> Im Browser öffnen: http://localhost:3000/qr\n')
-        }
+    sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
         if (connection === 'open') {
             isConnected = true
-            currentQR   = null
             console.log('✅ WhatsApp verbunden – Bridge ist bereit.')
         }
         if (connection === 'close') {
             isConnected = false
-            const err  = lastDisconnect?.error
-            const code = err?.output?.statusCode
-            console.log(`🔴 Verbindung getrennt – Code: ${code}, Fehler: ${err?.message || err}`)
+            const err     = lastDisconnect?.error
+            const code    = err?.output?.statusCode
             const loggedOut = code === DisconnectReason.loggedOut
+            console.log(`🔴 Verbindung getrennt – Code: ${code}, Fehler: ${err?.message || err}`)
             if (!loggedOut) connect()
         }
     })
 }
 
-// QR-Code als Bild im Browser anzeigen
-app.get('/qr', async (_, res) => {
-    if (isConnected) return res.send('<h2>✅ WhatsApp bereits verbunden!</h2>')
-    if (!currentQR)  return res.send('<p>Warte auf QR-Code... Seite neu laden.</p>')
-    const svg = await QRCode.toString(currentQR, { type: 'svg', width: 300 })
-    res.setHeader('Content-Type', 'text/html')
-    res.send(`<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<meta http-equiv="refresh" content="10">
-<title>Wonderbox QR</title></head>
-<body style="font-family:sans-serif;text-align:center;padding:40px">
-<h2>Mit WhatsApp scannen</h2>
-<p>Einstellungen → Verknüpfte Geräte → Gerät hinzufügen</p>
-${svg}
-<p style="color:gray;font-size:0.8em">Seite aktualisiert sich automatisch</p>
-</body></html>`)
-})
-
-// Status-Check
 app.get('/health', (_, res) => res.json({ connected: isConnected }))
 
-// Nachricht senden
 app.post('/send', async (req, res) => {
     if (req.headers['x-secret'] !== SECRET)
         return res.status(401).json({ ok: false, error: 'Unauthorized' })
