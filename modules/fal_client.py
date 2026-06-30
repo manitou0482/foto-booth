@@ -1,13 +1,14 @@
-"""Anbindung an fal.ai - FLUX.2 Bildgenerierung aus Referenzfoto.
+"""Anbindung an fal.ai - FLUX Img2Img Bildgenerierung aus Referenzfoto.
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
 
 Pipeline:
-1) Foto wird auf fal.ai hochgeladen (als @image1 referenziert).
-2) FLUX.2 (SCENE_ENDPOINTS) generiert die themenpassende Szene mit dem
-   Referenzfoto - Personenzahl, Posen und Identität werden direkt aus
-   @image1 übernommen.
+1) Foto wird auf fal.ai hochgeladen.
+2) Ausgabegröße wird aus dem Seitenverhältnis des Originalfotos berechnet
+   (durch 16 teilbar) - verhindert Ghostpersonen durch Kompositions-Neuerfindung.
+3) FLUX Img2Img transformiert das Foto mit GENERATION_STRENGTH: Personen-
+   Positionen bleiben strukturell erhalten, Hintergrund und Kleidung ändern sich.
 """
 import io
 import random
@@ -16,12 +17,16 @@ import fal_client
 from PIL import Image
 
 SCENE_ENDPOINTS = {
-    "dev": "fal-ai/flux-2/edit",       # schnell (~6-7s), für Party-Betrieb
-    "pro": "fal-ai/flux-2-pro/edit",   # höhere Qualität, ohne Zeitdruck
+    "dev": "fal-ai/flux/dev/image-to-image",
+    "pro": "fal-ai/flux-pro/image-to-image",
 }
 
-# fal.ai verarbeitet das Bild ohnehin in moderater Auflösung - Verkleinerung
-# vor dem Upload spart Bandbreite/Zeit.
+# Stärke der Transformation (0 = unverändertes Original, 1 = komplett neu).
+# 0.70: Personen-Positionen strukturell erhalten, Hintergrund/Kleidung ändern sich.
+# Niedriger = weniger Ghostpersonen, aber weniger dramatische Szene.
+# Höher = kreativere Szene, aber mehr Risiko für Ghostpersonen.
+GENERATION_STRENGTH = 0.70
+
 MAX_DIMENSION = 1024
 
 
@@ -33,6 +38,21 @@ def _resize_for_upload(image_bytes: bytes) -> bytes:
     return buf.getvalue()
 
 
+def _output_size(image_bytes: bytes) -> dict:
+    """Berechnet Ausgabegröße passend zum Eingabe-Seitenverhältnis, immer
+    durch 16 teilbar. Ein abweichendes Seitenverhältnis zwingt FLUX die
+    Komposition neu zu erfinden - Hauptursache für Ghostpersonen."""
+    img = Image.open(io.BytesIO(image_bytes))
+    w, h = img.size
+    if w >= h:
+        out_w = MAX_DIMENSION
+        out_h = round(h / w * MAX_DIMENSION / 16) * 16
+    else:
+        out_h = MAX_DIMENSION
+        out_w = round(w / h * MAX_DIMENSION / 16) * 16
+    return {"width": max(out_w, 16), "height": max(out_h, 16)}
+
+
 FORMAT_CLAUSE = (
     "The output must be a single cohesive photograph - never a collage, grid, "
     "contact sheet, or multiple separate panels. "
@@ -40,20 +60,14 @@ FORMAT_CLAUSE = (
 
 FACE_CLAUSE = (
     "Preserve the exact facial features, face shape, skin tone, eye color, hair color "
-    "and texture, and overall facial identity of the person from @image1 with maximum "
-    "accuracy - their face must be immediately and unmistakably recognizable as the same "
-    "individual in the output. Do not alter or genericize the face. "
-    "Preserve the gender of the person from @image1 exactly: if the person is a woman, "
-    "dress her in the women's version of the themed costume (e.g. period-appropriate "
-    "women's dress or feminine variant of the outfit); if the person is a man, dress him "
-    "in the men's version. Never change or override the person's gender presentation. "
+    "and texture of every person with maximum accuracy - each person must remain "
+    "immediately recognizable as themselves. "
+    "Preserve gender exactly: dress women in women's costume variants, men in men's. "
 )
 
 COUNT_CLAUSE = (
-    "Study @image1 carefully and count only the people who are clearly facing the camera "
-    "and looking directly into the lens — ignore anyone in the background or turned away. "
-    "Include exactly that many people in the generated image, no more, no less. "
-    "Do not invent additional people or bystanders. "
+    "Include only the people who are clearly in the foreground and facing the camera. "
+    "Do not add extra people or background bystanders. "
 )
 
 VISIBILITY_CLAUSE = (
@@ -65,21 +79,23 @@ VISIBILITY_CLAUSE = (
 STYLE_CLAUSE = (
     "The result should look like a fun, memorable photobooth photo — clear and easy to "
     "read at a glance, not an overwhelming epic movie poster. Keep the background "
-    "recognizable but simple and uncluttered. Good natural lighting, no extreme dramatic "
-    "effects or chaotic details. "
+    "simple and uncluttered. Good natural lighting, no extreme dramatic effects. "
 )
 
 
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
-    """Lädt das Foto hoch und lässt FLUX.2 die themenpassende Szene generieren.
-    Gibt die URL des generierten Bilds zurück."""
+    """Lädt das Foto hoch und transformiert es per FLUX Img2Img in die
+    themenpassende Szene. Gibt die URL des generierten Bilds zurück."""
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
+    size = _output_size(image_bytes)
     scene_result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
             "prompt": FORMAT_CLAUSE + VISIBILITY_CLAUSE + FACE_CLAUSE + COUNT_CLAUSE + STYLE_CLAUSE + prompt,
-            "image_urls": [image_url],
+            "image_url": image_url,
+            "strength": GENERATION_STRENGTH,
+            "image_size": size,
             "seed": random.randint(1, 99999999),
         },
     )
