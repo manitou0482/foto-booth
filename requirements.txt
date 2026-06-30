@@ -1,5 +1,5 @@
 streamlit>=1.32
-fal-client
+fal-client>=0.10,<1.0
 qrcode[pil]
 Pillow
 streamlit-autorefresh
