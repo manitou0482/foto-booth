@@ -83,6 +83,10 @@ FACE_CLAUSE = (
     "and texture, and overall facial identity of the person from @image1 with maximum "
     "accuracy - their face must be immediately and unmistakably recognizable as the same "
     "individual in the output. Do not alter or genericize the face. "
+    "Preserve the gender of the person from @image1 exactly: if the person is a woman, "
+    "dress her in the women's version of the themed costume (e.g. period-appropriate "
+    "women's dress or feminine variant of the outfit); if the person is a man, dress him "
+    "in the men's version. Never change or override the person's gender presentation. "
 )
 
 
