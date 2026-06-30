@@ -72,7 +72,10 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
         theme = next(t for t in themes if t["id"] == state.theme_id)
         try:
             url = fal_client.generate_image(
-                state.captured_image_bytes, theme["prompt"], admin_settings.scene_quality
+                state.captured_image_bytes,
+                theme["prompt"],
+                admin_settings.scene_quality,
+                group_mode=getattr(admin_settings, "group_mode", False),
             )
             state.result_image_url = url
         except Exception as e:
