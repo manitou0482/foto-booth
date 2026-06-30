@@ -78,6 +78,13 @@ FORMAT_CLAUSE = (
     "contact sheet, or multiple separate panels. "
 )
 
+FACE_CLAUSE = (
+    "Preserve the exact facial features, face shape, skin tone, eye color, hair color "
+    "and texture, and overall facial identity of the person from @image1 with maximum "
+    "accuracy - their face must be immediately and unmistakably recognizable as the same "
+    "individual in the output. Do not alter or genericize the face. "
+)
+
 
 def _build_prompt(prompt: str, num_people: int) -> str:
     if num_people <= 1:
@@ -94,7 +101,7 @@ def _build_prompt(prompt: str, num_people: int) -> str:
             f"must stay a child, not become an adult) - do not duplicate any of them or "
             f"add extra people. "
         )
-    return FORMAT_CLAUSE + count_clause + prompt
+    return FORMAT_CLAUSE + FACE_CLAUSE + count_clause + prompt
 
 
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
@@ -116,13 +123,7 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
             "seed": random.randint(1, 99999999),
         },
     )
-    scene_url = scene_result["images"][0]["url"]
-
-    swap_result = fal_client.run(
-        FACE_SWAP_ENDPOINT,
-        arguments={"base_image_url": scene_url, "swap_image_url": image_url},
-    )
-    return swap_result["image"]["url"]
+    return scene_result["images"][0]["url"]
 
 
 # ---------------------------------------------------------------------------
