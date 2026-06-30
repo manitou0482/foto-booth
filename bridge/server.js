@@ -2,6 +2,7 @@ const {
     default: makeWASocket,
     DisconnectReason,
     useMultiFileAuthState,
+    fetchLatestBaileysVersion,
 } = require('@whiskeysockets/baileys')
 const pino   = require('pino')
 const QRCode = require('qrcode')
@@ -19,8 +20,11 @@ let currentQR   = null
 
 async function connect() {
     const { state, saveCreds } = await useMultiFileAuthState('wa_session')
+    const { version } = await fetchLatestBaileysVersion()
+    console.log(`Verwende WhatsApp-Version: ${version.join('.')}`)
 
     sock = makeWASocket({
+        version,
         auth: state,
         logger: pino({ level: 'silent' }),
     })
