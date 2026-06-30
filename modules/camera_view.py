@@ -38,19 +38,25 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
             st.rerun()
 
     elif state.phase == "countdown":
+        # Kamera mit token="none" vorheizen: Stream öffnet sich, kein Auslöser.
+        # Gleicher key wie in captured_ready → selber iframe bleibt erhalten,
+        # Kamera ist sofort bereit wenn das echte Token eintrifft.
+        camera_component.camera_widget(
+            trigger_token="none",
+            key="booth_camera",
+            facing_mode=admin_settings.camera_facing,
+        )
         ui_components.render_countdown(3)
         state.capture_token = str(time.time())
         state.phase = "captured_ready"
         st.rerun()
 
     elif state.phase == "captured_ready":
-        # key enthält das Token, damit Streamlit die Komponente jede Runde als
-        # NEUES Widget behandelt - sonst könnte intern noch ein Rückgabewert
-        # einer früheren Runde am alten, gleichbleibenden Key hängen bleiben
-        # und versehentlich für die aktuelle Aufnahme verwendet werden.
+        # Stale-Value-Schutz erfolgt im Python-Check in camera_component.py
+        # (result["token"] == trigger_token), daher kann der key konstant bleiben.
         photo_base64 = camera_component.camera_widget(
             trigger_token=state.capture_token,
-            key=f"booth_camera_{state.capture_token}",
+            key="booth_camera",
             facing_mode=admin_settings.camera_facing,
         )
         if photo_base64:
