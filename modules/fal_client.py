@@ -49,6 +49,13 @@ FACE_CLAUSE = (
     "in the men's version. Never change or override the person's gender presentation. "
 )
 
+COUNT_CLAUSE = (
+    "Study @image1 carefully and count only the people who are clearly facing the camera "
+    "and looking directly into the lens — ignore anyone in the background or turned away. "
+    "Include exactly that many people in the generated image, no more, no less. "
+    "Do not invent additional people or bystanders. "
+)
+
 
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
     """Lädt das Foto hoch und lässt FLUX.2 die themenpassende Szene generieren.
@@ -58,7 +65,7 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
     scene_result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
-            "prompt": FORMAT_CLAUSE + FACE_CLAUSE + prompt,
+            "prompt": FORMAT_CLAUSE + FACE_CLAUSE + COUNT_CLAUSE + prompt,
             "image_urls": [image_url],
             "seed": random.randint(1, 99999999),
         },
