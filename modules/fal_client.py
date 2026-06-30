@@ -56,6 +56,19 @@ COUNT_CLAUSE = (
     "Do not invent additional people or bystanders. "
 )
 
+VISIBILITY_CLAUSE = (
+    "Every person's face must stay fully visible and unobstructed — no helmets, masks, "
+    "full-face visors, or hoods covering any part of the face, even if the costume would "
+    "normally include one. "
+)
+
+STYLE_CLAUSE = (
+    "The result should look like a fun, memorable photobooth photo — clear and easy to "
+    "read at a glance, not an overwhelming epic movie poster. Keep the background "
+    "recognizable but simple and uncluttered. Good natural lighting, no extreme dramatic "
+    "effects or chaotic details. "
+)
+
 
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
     """Lädt das Foto hoch und lässt FLUX.2 die themenpassende Szene generieren.
@@ -65,7 +78,7 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
     scene_result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
-            "prompt": FORMAT_CLAUSE + FACE_CLAUSE + COUNT_CLAUSE + prompt,
+            "prompt": FORMAT_CLAUSE + VISIBILITY_CLAUSE + FACE_CLAUSE + COUNT_CLAUSE + STYLE_CLAUSE + prompt,
             "image_urls": [image_url],
             "seed": random.randint(1, 99999999),
         },
