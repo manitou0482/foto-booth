@@ -37,7 +37,6 @@ class AdminSettings:
     Kamera-Hardware sich nicht pro Gast ändert."""
     camera_facing: str = "environment"  # "environment" = Rückkamera, "user" = Frontkamera
     scene_quality: str = "dev"  # "dev" = schnell (Party), "pro" = höhere Qualität
-    group_mode: bool = False      # True = Moondream2-Personenerkennung für Gruppenfotos
 
 
 @st.cache_resource

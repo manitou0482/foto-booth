@@ -97,19 +97,16 @@ def _build_prompt(prompt: str, num_people: int) -> str:
     return FORMAT_CLAUSE + count_clause + prompt
 
 
-def generate_image(
-    image_bytes: bytes,
-    prompt: str,
-    quality: str = "dev",
-    group_mode: bool = False,
-) -> str:
-    """FLUX.2-Pipeline. Im dev-Modus (Party): nur Upload + Szene = 2 API-Calls.
-    Im pro-Modus: zusätzlich face-swap für maximale Gesichts-Treue.
-    group_mode=True aktiviert Moondream2-Personenerkennung für Gruppenfotos."""
+def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
+    """Zwei-Schritt-Pipeline: FLUX.2 erzeugt die themenpassende Szene aus dem
+    Referenzfoto, fal-ai/face-swap setzt danach das echte Gesicht auf das
+    Ergebnis - macht die Gesichts-Identität unabhängig davon, wie dramatisch
+    die Pose/Verdeckung im jeweiligen Thema ist. Gibt die URL des finalen
+    Ergebnisbilds zurück."""
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
 
-    num_people = _detect_num_people(image_url) if group_mode else 1
+    num_people = _detect_num_people(image_url)
 
     scene_result = fal_client.run(
         SCENE_ENDPOINTS[quality],
@@ -121,14 +118,11 @@ def generate_image(
     )
     scene_url = scene_result["images"][0]["url"]
 
-    if quality == "pro":
-        swap_result = fal_client.run(
-            FACE_SWAP_ENDPOINT,
-            arguments={"base_image_url": scene_url, "swap_image_url": image_url},
-        )
-        return swap_result["image"]["url"]
-
-    return scene_url
+    swap_result = fal_client.run(
+        FACE_SWAP_ENDPOINT,
+        arguments={"base_image_url": scene_url, "swap_image_url": image_url},
+    )
+    return swap_result["image"]["url"]
 
 
 # ---------------------------------------------------------------------------

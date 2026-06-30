@@ -73,12 +73,6 @@ quality_label = st.sidebar.radio(
 )
 admin_settings.scene_quality = "dev" if quality_label == "Schnell (Party)" else "pro"
 
-admin_settings.group_mode = st.sidebar.checkbox(
-    "Gruppenfotos (mehrere Personen)",
-    value=getattr(admin_settings, "group_mode", False),
-    help="Aktiviert automatische Personenerkennung. Nur einschalten wenn mehrere Personen fotografiert werden – kostet ca. 3–5s extra.",
-)
-
 if mode == "1 Gerät":
     state = get_session_state()
     camera_view.render(state, themes, admin_settings, all_in_one=True)
