@@ -144,12 +144,24 @@ def render_result(result_url: str, input_image_bytes: bytes | None = None):
         share_text = urllib.parse.quote(f"Mein Wonderbox-Bild: {result_url}")
 
         phone = st.text_input(
-            "Telefonnummer (optional, mit Ländervorwahl, z.B. 4915512345678)",
+            "📲 WhatsApp-Nummer (mit Ländervorwahl, z.B. 4915512345678)",
             key=f"whatsapp_phone_{result_url}",
+            placeholder="4915512345678",
         )
-        phone_digits = "".join(ch for ch in phone if ch.isdigit())
-        whatsapp_url = f"https://wa.me/{phone_digits}?text={share_text}" if phone_digits else f"https://wa.me/?text={share_text}"
-        st.link_button("📲 WhatsApp", whatsapp_url, use_container_width=True)
+        if st.button(
+            "📲 Per WhatsApp senden",
+            use_container_width=True,
+            disabled=not phone.strip(),
+            key=f"whatsapp_send_{result_url}",
+        ):
+            from modules import whatsapp_client
+            with st.spinner("Wird gesendet..."):
+                ok, err = whatsapp_client.send_image(phone, result_url)
+            if ok:
+                st.success("✅ Foto wurde per WhatsApp gesendet!")
+            else:
+                st.error(f"WhatsApp-Fehler: {err}")
+
         st.link_button(
             "📧 E-Mail",
             f"mailto:?subject=Mein%20Wonderbox-Bild&body={share_text}",
