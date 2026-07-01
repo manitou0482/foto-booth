@@ -19,6 +19,7 @@ class BoothState:
     captured_image_bytes: bytes | None = None
     result_image_url: str | None = None
     error: str | None = None
+    face_swap_status: str | None = None
     lock: threading.Lock = field(default_factory=threading.Lock)
 
     def reset(self):
@@ -30,6 +31,7 @@ class BoothState:
             self.captured_image_bytes = None
             self.result_image_url = None
             self.error = None
+            self.face_swap_status = None
 
 
 @dataclass
