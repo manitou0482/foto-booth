@@ -17,14 +17,6 @@ SCENE_ENDPOINTS = {
 
 MAX_DIMENSION = 1024
 
-MASTER_FRAMEWORK = (
-    "Photorealistic cinematic photo. The people from @image1 looking directly at the camera "
-    "with clear, well-lit facial expressions, faces fully visible. "
-    "{prompt} "
-    "Single cohesive photograph, not a collage or grid."
-)
-
-
 def _resize_for_upload(image_bytes: bytes) -> bytes:
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     img.thumbnail((MAX_DIMENSION, MAX_DIMENSION))
@@ -50,12 +42,10 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
     size = _output_size(image_bytes)
 
-    full_prompt = MASTER_FRAMEWORK.format(prompt=prompt)
-
     result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
-            "prompt": full_prompt,
+            "prompt": prompt,
             "image_urls": [image_url],
             "image_size": size,
             "seed": random.randint(1, 99999999),
