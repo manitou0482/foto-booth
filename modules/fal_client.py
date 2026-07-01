@@ -15,7 +15,7 @@ SCENE_ENDPOINTS = {
     "pro": "fal-ai/flux-2-pro/edit",
 }
 
-FACESWAP_MODEL = "ddvinh1/tool-faceswap:eb7ba9899d3f4481d713288d937f337643c29e17a5214d70e65a696ffe53c915"
+FACESWAP_MODEL = "ddvinh1/inswapper:25bdae46f2713138640b6e8c04dc4ca18625ce95b1863936b053eee42d9ba6db"
 
 MAX_DIMENSION = 1024
 
@@ -48,16 +48,12 @@ def _output_size(image_bytes: bytes) -> dict:
 
 
 def face_swap(source_url: str, target_url: str, num_people: int = 1) -> str:
-    """Überträgt Gesichter aus source_url auf target_url via Replicate.
-    mode=single für 1 Person, mode=all für Gruppen."""
-    mode = "single" if num_people == 1 else "all"
+    """Überträgt Gesichter aus source_url auf target_url via Replicate inswapper."""
     output = replicate.run(
         FACESWAP_MODEL,
         input={
-            "mode": mode,
-            "source": source_url,
-            "target": target_url,
-            "is_use_mask": True,
+            "source_img": source_url,
+            "target_img": target_url,
         },
     )
     return output.url
