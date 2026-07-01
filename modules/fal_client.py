@@ -46,23 +46,23 @@ def _output_size(image_bytes: bytes) -> dict:
     return {"width": max(out_w, 16), "height": max(out_h, 16)}
 
 
-def _face_swap(source_url: str, target_url: str) -> str:
+def face_swap(source_url: str, target_url: str) -> str:
     """Überträgt Gesichter aus source_url auf target_url via ReActor.
-    Gibt target_url unverändert zurück wenn Face-Swap fehlschlägt."""
-    try:
-        result = fal_client.run(
-            FACESWAP_ENDPOINT,
-            arguments={
-                "source_image_url": source_url,
-                "target_image_url": target_url,
-            },
-        )
-        return result["image"]["url"]
-    except Exception:
-        return target_url
+    Wirft Exception wenn der Endpunkt nicht erreichbar ist oder fehlschlägt."""
+    result = fal_client.run(
+        FACESWAP_ENDPOINT,
+        arguments={
+            "source_image_url": source_url,
+            "target_image_url": target_url,
+        },
+    )
+    return result["image"]["url"]
 
 
-def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_people: int = 1) -> str:
+def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_people: int = 1) -> tuple[str, str]:
+    """Gibt (image_url, scene_url) zurück.
+    image_url = hochgeladenes Originalfoto (für Face-Swap),
+    scene_url = FLUX.2-Ergebnis."""
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
     size = _output_size(image_bytes)
@@ -73,7 +73,6 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
     )
     full_prompt = count_prefix + prompt
 
-    # Schritt 1: FLUX.2 generiert die Szene
     scene_result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
@@ -84,6 +83,4 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
         },
     )
     scene_url = scene_result["images"][0]["url"]
-
-    # Schritt 2: Originalgesichter auf die generierte Szene übertragen
-    return _face_swap(image_url, scene_url)
+    return image_url, scene_url
