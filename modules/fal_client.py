@@ -3,7 +3,6 @@
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
 """
-import concurrent.futures
 import io
 import random
 
@@ -48,34 +47,16 @@ def _output_size(image_bytes: bytes) -> dict:
 
 
 def face_swap(source_url: str, target_url: str) -> str:
-    """Überträgt Gesichter aus source_url auf target_url via easel-ai/advanced-face-swap.
-    Wirft Exception wenn der Endpunkt nicht erreichbar ist, fehlschlägt oder Timeout."""
-    print(f"[face_swap] Starte Aufruf: {FACESWAP_ENDPOINT}")
-    print(f"[face_swap] source_url: {source_url}")
-    print(f"[face_swap] target_url: {target_url}")
-
-    def _run():
-        print("[face_swap] API-Call läuft ...")
-        result = fal_client.run(
-            FACESWAP_ENDPOINT,
-            arguments={
-                "face_image_0": {"url": source_url},
-                "gender_0": "non-binary",
-                "target_image": {"url": target_url},
-                "workflow_type": "target_hair",
-            },
-        )
-        print(f"[face_swap] Antwort erhalten: {result}")
-        return result
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(_run)
-        try:
-            result = future.result(timeout=45)
-        except concurrent.futures.TimeoutError:
-            print("[face_swap] TIMEOUT nach 45s")
-            raise Exception("Timeout nach 45s — Endpunkt antwortet nicht")
-    print(f"[face_swap] Erfolg: {result['image']['url']}")
+    """Überträgt Gesichter aus source_url auf target_url via easel-ai/advanced-face-swap."""
+    result = fal_client.run(
+        FACESWAP_ENDPOINT,
+        arguments={
+            "face_image_0": {"url": source_url},
+            "gender_0": "non-binary",
+            "target_image": {"url": target_url},
+            "workflow_type": "target_hair",
+        },
+    )
     return result["image"]["url"]
 
 
