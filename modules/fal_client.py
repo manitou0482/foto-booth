@@ -1,4 +1,4 @@
-"""Pipeline: Foto → FLUX.2 Szene → Face-Swap → finale URL.
+"""Pipeline: Foto → PuLID (Gesichtsidentität + Thema) → finale URL.
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
@@ -9,12 +9,7 @@ import random
 import fal_client
 from PIL import Image
 
-SCENE_ENDPOINTS = {
-    "dev": "fal-ai/flux-2/edit",
-    "pro": "fal-ai/flux-2-pro/edit",
-}
-
-FACESWAP_ENDPOINT = "half-moon-ai/ai-face-swap/faceswapimage"
+PULID_ENDPOINT = "fal-ai/pulid"
 
 MAX_DIMENSION = 1024
 
@@ -46,27 +41,10 @@ def _output_size(image_bytes: bytes) -> dict:
     return {"width": max(out_w, 16), "height": max(out_h, 16)}
 
 
-def face_swap(source_url: str, target_url: str) -> str:
-    """Überträgt Gesichter aus source_url auf target_url via easel-ai/advanced-face-swap."""
-    result = fal_client.run(
-        FACESWAP_ENDPOINT,
-        arguments={
-            "source_face_url_1": source_url,
-            "target_image_url": target_url,
-        },
-    )
-    return result["image"]["url"]
-
-
-def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_people: int = 1) -> tuple[str, str]:
-    """Gibt (image_url, scene_url) zurück.
-    image_url = hochgeladenes Originalfoto (für Face-Swap),
-    scene_url = FLUX.2-Ergebnis."""
-    print(f"[generate_image] Start — quality={quality}, num_people={num_people}")
+def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_people: int = 1) -> str:
+    """Gibt result_url zurück: PuLID-generiertes Bild mit Gesichtsidentität aus dem Originalfoto."""
     resized_bytes = _resize_for_upload(image_bytes)
-    print("[generate_image] Upload startet ...")
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
-    print(f"[generate_image] Upload fertig: {image_url}")
     size = _output_size(image_bytes)
 
     count_prefix = _COUNT_PREFIXES.get(
@@ -75,16 +53,15 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
     )
     full_prompt = count_prefix + prompt
 
-    print(f"[generate_image] FLUX.2 startet — endpoint={SCENE_ENDPOINTS[quality]}")
-    scene_result = fal_client.run(
-        SCENE_ENDPOINTS[quality],
+    result = fal_client.run(
+        PULID_ENDPOINT,
         arguments={
+            "reference_images": [{"image_url": image_url}],
             "prompt": full_prompt,
-            "image_urls": [image_url],
             "image_size": size,
+            "id_scale": 0.8,
+            "mode": "fidelity",
             "seed": random.randint(1, 99999999),
         },
     )
-    scene_url = scene_result["images"][0]["url"]
-    print(f"[generate_image] FLUX.2 fertig: {scene_url}")
-    return image_url, scene_url
+    return result["images"][0]["url"]
