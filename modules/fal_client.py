@@ -14,7 +14,7 @@ SCENE_ENDPOINTS = {
     "pro": "fal-ai/flux-2-pro/edit",
 }
 
-FACESWAP_ENDPOINT = "half-moon-ai/ai-face-swap/faceswapimagemulti"
+FACESWAP_ENDPOINT = "half-moon-ai/ai-face-swap/faceswapimage"
 
 MAX_DIMENSION = 1024
 
