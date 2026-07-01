@@ -1,4 +1,4 @@
-"""Pipeline: Foto → FLUX.2 → finale URL.
+"""Pipeline: Foto → FLUX PuLID (FLUX.1 + Gesichtsidentität) → finale URL.
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
@@ -10,8 +10,8 @@ import fal_client
 from PIL import Image
 
 SCENE_ENDPOINTS = {
-    "dev": "fal-ai/flux-2/edit",
-    "pro": "fal-ai/flux-2-pro/edit",
+    "dev": "fal-ai/flux-pulid",
+    "pro": "fal-ai/flux-pulid",
 }
 
 MAX_DIMENSION = 1024
@@ -59,8 +59,8 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
     result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
+            "reference_image_url": image_url,
             "prompt": full_prompt,
-            "image_urls": [image_url],
             "image_size": size,
             "seed": random.randint(1, 99999999),
         },
