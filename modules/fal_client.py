@@ -53,7 +53,7 @@ def face_swap(source_url: str, target_url: str) -> str:
     output = replicate.run(
         FACESWAP_MODEL,
         input={
-            "execution_type": "face_index",
+            "execution_type": "all",
             "source_face_image": source_url,
             "destination_image": target_url,
         },
