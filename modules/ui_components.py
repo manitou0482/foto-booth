@@ -10,7 +10,6 @@ import qrcode
 import streamlit as st
 
 
-@st.cache_data
 def load_themes():
     with open("prompts.json", "r", encoding="utf-8") as f:
         return json.load(f)
