@@ -14,7 +14,7 @@ SCENE_ENDPOINTS = {
     "pro": "fal-ai/flux-2-pro/edit",
 }
 
-FACESWAP_ENDPOINT = "fal-ai/face-swap"
+FACESWAP_ENDPOINT = "easel-ai/advanced-face-swap"
 
 MAX_DIMENSION = 1024
 
@@ -47,13 +47,15 @@ def _output_size(image_bytes: bytes) -> dict:
 
 
 def face_swap(source_url: str, target_url: str) -> str:
-    """Überträgt Gesichter aus source_url auf target_url via ReActor.
+    """Überträgt Gesichter aus source_url auf target_url via easel-ai/advanced-face-swap.
     Wirft Exception wenn der Endpunkt nicht erreichbar ist oder fehlschlägt."""
     result = fal_client.run(
         FACESWAP_ENDPOINT,
         arguments={
-            "source_image_url": source_url,
-            "target_image_url": target_url,
+            "face_image_0": {"url": source_url},
+            "gender_0": "non-binary",
+            "target_image": {"url": target_url},
+            "workflow_type": "target_hair",
         },
     )
     return result["image"]["url"]
