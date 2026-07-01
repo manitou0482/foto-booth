@@ -15,7 +15,7 @@ SCENE_ENDPOINTS = {
     "pro": "fal-ai/flux-2-pro/edit",
 }
 
-FACESWAP_MODEL = "mertguvencli/face-swap-with-indexes:518f2116425c40acb5c234031c55daf843c1357eff784370fe9489e57b65c150"
+FACESWAP_MODEL = "ddvinh1/tool-faceswap:eb7ba9899d3f4481d713288d937f337643c29e17a5214d70e65a696ffe53c915"
 
 MAX_DIMENSION = 1024
 
@@ -47,15 +47,17 @@ def _output_size(image_bytes: bytes) -> dict:
     return {"width": max(out_w, 16), "height": max(out_h, 16)}
 
 
-def face_swap(source_url: str, target_url: str) -> str:
-    """Überträgt alle Gesichter aus source_url auf target_url via Replicate.
-    Wirft Exception wenn der Aufruf fehlschlägt."""
+def face_swap(source_url: str, target_url: str, num_people: int = 1) -> str:
+    """Überträgt Gesichter aus source_url auf target_url via Replicate.
+    mode=single für 1 Person, mode=all für Gruppen."""
+    mode = "single" if num_people == 1 else "all"
     output = replicate.run(
         FACESWAP_MODEL,
         input={
-            "execution_type": "all",
-            "source_face_image": source_url,
-            "destination_image": target_url,
+            "mode": mode,
+            "source": source_url,
+            "target": target_url,
+            "is_use_mask": True,
         },
     )
     return output.url

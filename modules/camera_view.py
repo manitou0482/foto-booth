@@ -81,7 +81,7 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
                 state.captured_image_bytes, theme["prompt"], admin_settings.scene_quality, state.num_people
             )
             try:
-                final_url = fal_client.face_swap(image_url, scene_url)
+                final_url = fal_client.face_swap(image_url, scene_url, state.num_people)
                 state.result_image_url = final_url
                 state.face_swap_status = "✅ Face-Swap erfolgreich"
             except Exception as swap_err:
