@@ -14,12 +14,17 @@ Pipeline:
 import io
 import random
 
-import cv2
 import fal_client
-import mediapipe as mp
-import numpy as np
 import requests
 from PIL import Image
+
+try:
+    import cv2
+    import mediapipe as mp
+    import numpy as np
+    _BLEND_AVAILABLE = True
+except ImportError:
+    _BLEND_AVAILABLE = False
 
 SCENE_ENDPOINTS = {
     "dev": "fal-ai/flux-2/edit",
@@ -249,20 +254,22 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
     response.raise_for_status()
     flux_bytes = response.content
 
-    # 4. Lokales Face-Blending
-    try:
-        original_bgr = _bytes_to_bgr(resized_bytes)
-        flux_bgr     = _bytes_to_bgr(flux_bytes)
+    # 4. Lokales Face-Blending (nur wenn cv2/mediapipe verfügbar)
+    if _BLEND_AVAILABLE:
+        try:
+            original_bgr = _bytes_to_bgr(resized_bytes)
+            flux_bgr     = _bytes_to_bgr(flux_bytes)
 
-        # Auf gleiche Größe bringen falls nötig
-        if original_bgr.shape[:2] != flux_bgr.shape[:2]:
-            flux_h, flux_w = flux_bgr.shape[:2]
-            original_bgr = cv2.resize(original_bgr, (flux_w, flux_h), interpolation=cv2.INTER_LANCZOS4)
+            # Auf gleiche Größe bringen falls nötig
+            if original_bgr.shape[:2] != flux_bgr.shape[:2]:
+                flux_h, flux_w = flux_bgr.shape[:2]
+                original_bgr = cv2.resize(original_bgr, (flux_w, flux_h), interpolation=cv2.INTER_LANCZOS4)
 
-        blended_bgr   = _blend_faces(original_bgr, flux_bgr)
-        blended_bytes = _bgr_to_bytes(blended_bgr)
-    except Exception:
-        # Bei jedem Fehler im lokalen Blending FLUX-Ergebnis direkt verwenden
+            blended_bgr   = _blend_faces(original_bgr, flux_bgr)
+            blended_bytes = _bgr_to_bytes(blended_bgr)
+        except Exception:
+            blended_bytes = flux_bytes
+    else:
         blended_bytes = flux_bytes
 
     # 5. Geblendetes Bild hochladen + URL zurückgeben
