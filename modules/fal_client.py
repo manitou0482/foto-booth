@@ -7,8 +7,15 @@ import io
 import random
 
 import fal_client
-import requests
 from PIL import Image
+
+try:
+    import cv2
+    import mediapipe as mp
+    import numpy as np
+    _COUNT_AVAILABLE = True
+except ImportError:
+    _COUNT_AVAILABLE = False
 
 SCENE_ENDPOINTS = {
     "dev": "fal-ai/flux-2/edit",
@@ -16,6 +23,16 @@ SCENE_ENDPOINTS = {
 }
 
 MAX_DIMENSION = 1024
+
+# Boostwords je Personenzahl — ganz vorne im Prompt,
+# FLUX.2 gewichtet frühe Tokens stärker
+_COUNT_PREFIXES = {
+    1: "1person, solo, only one person, single subject, do not add any other people, ",
+    2: "2people, exactly two people, only two people, duo, do not add any other people, ",
+    3: "3people, exactly three people, only three people, trio, do not add any other people, ",
+    4: "4people, exactly four people, only four people, do not add any other people, ",
+}
+
 
 def _resize_for_upload(image_bytes: bytes) -> bytes:
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
@@ -37,15 +54,36 @@ def _output_size(image_bytes: bytes) -> dict:
     return {"width": max(out_w, 16), "height": max(out_h, 16)}
 
 
+def _count_faces(image_bytes: bytes) -> int:
+    """Zählt Gesichter via MediaPipe FaceMesh. Gibt 0 zurück wenn nicht verfügbar."""
+    if not _COUNT_AVAILABLE:
+        return 0
+    arr = np.frombuffer(image_bytes, np.uint8)
+    bgr = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+    rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+    with mp.solutions.face_mesh.FaceMesh(
+        max_num_faces=8,
+        refine_landmarks=False,
+        min_detection_confidence=0.4,
+    ) as fm:
+        res = fm.process(rgb)
+    return len(res.multi_face_landmarks) if res.multi_face_landmarks else 0
+
+
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
     size = _output_size(image_bytes)
 
+    n = _count_faces(resized_bytes)
+    count_prefix = _COUNT_PREFIXES.get(n, f"{n}people, exactly {n} people, only {n} people, do not add any other people, ") if n > 0 else ""
+
+    full_prompt = count_prefix + prompt
+
     result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
-            "prompt": prompt,
+            "prompt": full_prompt,
             "image_urls": [image_url],
             "image_size": size,
             "seed": random.randint(1, 99999999),
