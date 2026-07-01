@@ -1,16 +1,18 @@
-"""Hybrid-Pipeline: FLUX.2 Cloud-Generierung + lokales Face-Blending.
+"""Hybrid-Pipeline: birefnet + FLUX.2 Cloud-Generierung + lokales Face-Blending.
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
 
 Pipeline:
-1) Foto hochladen + Ausgabegröße aus Seitenverhältnis berechnen (÷16).
-2) MediaPipe FaceMesh zählt Gesichter lokal → Count-Boostwords an Prompt-Anfang.
-3) FLUX.2 generiert neue Szene basierend auf @image1 + dynamischem Prompt.
-4) Lokales Face-Blending: Affiner Warp (cv2.getAffineTransform) +
-   99×99 Gaussian-Feathering — vollständig auf lokaler Festplatte abgeschlossen
-   bevor Schritt 5 startet.
-5) Geblendetes Bild von Festplatte lesen, hochladen → finale URL zurückgeben.
+1)   Foto hochladen + Ausgabegröße aus Seitenverhältnis berechnen (÷16).
+1.5) birefnet entfernt den Hintergrund → nur Person(en) auf weißem BG.
+     Verhindert Geisterpersonen: FLUX.2 sieht ausschließlich die Vordergrundpersonen.
+2)   MediaPipe FaceMesh zählt Gesichter lokal → Count-Boostwords an Prompt-Anfang.
+3)   FLUX.2 generiert neue Szene aus dem freigestellten Bild + dynamischem Prompt.
+4)   Lokales Face-Blending: Affiner Warp (cv2.getAffineTransform) aus ORIGINALFOTO
+     (nicht aus freigestelltem Bild) + 99×99 Gaussian-Feathering → Haare/Tattoos erhalten.
+     Vollständig auf lokaler Festplatte abgeschlossen bevor Schritt 5 startet.
+5)   Geblendetes Bild von Festplatte lesen, hochladen → finale URL zurückgeben.
 """
 import io
 import os
@@ -33,6 +35,7 @@ SCENE_ENDPOINTS = {
     "dev": "fal-ai/flux-2/edit",
     "pro": "fal-ai/flux-2-pro/edit",
 }
+BIREFNET_ENDPOINT = "fal-ai/birefnet"
 
 MAX_DIMENSION = 1024
 
@@ -90,6 +93,29 @@ def _bgr_to_bytes(image_bgr: np.ndarray, quality: int = 90) -> bytes:
     if not ok:
         raise RuntimeError("cv2.imencode fehlgeschlagen")
     return buf.tobytes()
+
+
+# ---------------------------------------------------------------------------
+# Hintergrundentfernung (birefnet)
+# ---------------------------------------------------------------------------
+
+def _remove_background(image_url: str) -> bytes:
+    """Entfernt den Hintergrund via fal-ai/birefnet. Gibt JPEG-Bytes mit weißem
+    Hintergrund zurück (FLUX.2 kann keinen Alpha-Kanal verarbeiten).
+    Verhindert Geisterpersonen: FLUX.2 sieht nur noch die Vordergrundpersonen."""
+    result = fal_client.run(
+        BIREFNET_ENDPOINT,
+        arguments={"image_url": image_url},
+    )
+    resp = requests.get(result["image"]["url"], timeout=30)
+    resp.raise_for_status()
+    # PNG mit Transparenz → weißer Hintergrund → JPEG
+    img = Image.open(io.BytesIO(resp.content)).convert("RGBA")
+    bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
+    bg.paste(img, mask=img.split()[3])
+    buf = io.BytesIO()
+    bg.convert("RGB").save(buf, format="JPEG", quality=90)
+    return buf.getvalue()
 
 
 # ---------------------------------------------------------------------------
@@ -228,6 +254,13 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
     size = _output_size(image_bytes)
 
+    # ── Schritt 1.5: Hintergrund entfernen (birefnet) ─────────────────────────
+    # clean_url → geht an FLUX.2: nur Vordergrundpersonen auf weißem BG sichtbar
+    # → FLUX.2 kann keine Hintergrundpersonen mehr generieren
+    # original_bgr (unverändert) → geht an Face-Blending: Haare/Tattoos aus Original
+    clean_bytes = _remove_background(image_url)
+    clean_url = fal_client.upload(clean_bytes, "image/jpeg")
+
     # ── Schritt 2: Gesichter lokal zählen → Count-Prefix ─────────────────────
     # FaceMesh läuft genau EINMAL auf dem Originalfoto. orig_lms wird gecacht
     # und direkt an _blend_faces() übergeben — kein zweiter Durchlauf in Schritt 4.
@@ -257,7 +290,7 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
         SCENE_ENDPOINTS[quality],
         arguments={
             "prompt": full_prompt,
-            "image_urls": [image_url],
+            "image_urls": [clean_url],
             "image_size": size,
             "seed": random.randint(1, 99999999),
         },
