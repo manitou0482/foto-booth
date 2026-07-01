@@ -4,5 +4,3 @@ qrcode[pil]
 Pillow
 streamlit-autorefresh
 requests
-mediapipe
-opencv-python-headless
