@@ -14,7 +14,7 @@ SCENE_ENDPOINTS = {
     "pro": "fal-ai/flux-2-pro/edit",
 }
 
-FACESWAP_ENDPOINT = "fal-ai/reactor"
+FACESWAP_ENDPOINT = "fal-ai/face-swap"
 
 MAX_DIMENSION = 1024
 
