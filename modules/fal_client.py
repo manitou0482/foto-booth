@@ -1,4 +1,4 @@
-"""Einfache Pipeline: Foto hochladen → FLUX.2 → URL zurückgeben.
+"""Pipeline: Foto → FLUX.2 Szene → Face-Swap → finale URL.
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
@@ -13,6 +13,8 @@ SCENE_ENDPOINTS = {
     "dev": "fal-ai/flux-2/edit",
     "pro": "fal-ai/flux-2-pro/edit",
 }
+
+FACESWAP_ENDPOINT = "fal-ai/reactor"
 
 MAX_DIMENSION = 1024
 
@@ -44,6 +46,22 @@ def _output_size(image_bytes: bytes) -> dict:
     return {"width": max(out_w, 16), "height": max(out_h, 16)}
 
 
+def _face_swap(source_url: str, target_url: str) -> str:
+    """Überträgt Gesichter aus source_url auf target_url via ReActor.
+    Gibt target_url unverändert zurück wenn Face-Swap fehlschlägt."""
+    try:
+        result = fal_client.run(
+            FACESWAP_ENDPOINT,
+            arguments={
+                "source_image_url": source_url,
+                "target_image_url": target_url,
+            },
+        )
+        return result["image"]["url"]
+    except Exception:
+        return target_url
+
+
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_people: int = 1) -> str:
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
@@ -55,7 +73,8 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
     )
     full_prompt = count_prefix + prompt
 
-    result = fal_client.run(
+    # Schritt 1: FLUX.2 generiert die Szene
+    scene_result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
             "prompt": full_prompt,
@@ -64,4 +83,7 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
             "seed": random.randint(1, 99999999),
         },
     )
-    return result["images"][0]["url"]
+    scene_url = scene_result["images"][0]["url"]
+
+    # Schritt 2: Originalgesichter auf die generierte Szene übertragen
+    return _face_swap(image_url, scene_url)
