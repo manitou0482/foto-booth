@@ -54,6 +54,13 @@ def face_swap(source_url: str, target_url: str, num_people: int = 1) -> str:
         input={
             "source_img": source_url,
             "target_img": target_url,
+            "source_indexes": "-1",
+            "target_indexes": "-1",
+            "face_restore": True,
+            "background_enhance": False,
+            "face_upsample": True,
+            "upscale": 1,
+            "codeformer_fidelity": 0.75,
         },
     )
     return output.url
