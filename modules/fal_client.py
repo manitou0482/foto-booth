@@ -83,8 +83,11 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
     """Gibt (image_url, scene_url) zurück.
     image_url = hochgeladenes Originalfoto (für Face-Swap),
     scene_url = FLUX.2-Ergebnis."""
+    print(f"[generate_image] Start — quality={quality}, num_people={num_people}")
     resized_bytes = _resize_for_upload(image_bytes)
+    print("[generate_image] Upload startet ...")
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
+    print(f"[generate_image] Upload fertig: {image_url}")
     size = _output_size(image_bytes)
 
     count_prefix = _COUNT_PREFIXES.get(
@@ -93,6 +96,7 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
     )
     full_prompt = count_prefix + prompt
 
+    print(f"[generate_image] FLUX.2 startet — endpoint={SCENE_ENDPOINTS[quality]}")
     scene_result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
@@ -103,4 +107,5 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
         },
     )
     scene_url = scene_result["images"][0]["url"]
+    print(f"[generate_image] FLUX.2 fertig: {scene_url}")
     return image_url, scene_url
