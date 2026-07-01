@@ -33,6 +33,12 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
             "<p style='text-align:center;'>Stellt euch auf und tippt los!</p>",
             unsafe_allow_html=True,
         )
+        state.num_people = st.radio(
+            "Wie viele Personen sind im Bild?",
+            [1, 2, 3, 4],
+            horizontal=True,
+            index=state.num_people - 1,
+        )
         if st.button("📸 Foto machen!", use_container_width=True, type="primary"):
             state.phase = "countdown"
             st.rerun()
@@ -70,14 +76,9 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
         with placeholder:
             ui_components.render_loading_spinner()
         theme = next(t for t in themes if t["id"] == state.theme_id)
-        dbg = fal_client.debug_count(state.captured_image_bytes)
-        if dbg["available"]:
-            st.info(f"🔍 MediaPipe aktiv — {dbg['faces']} Gesicht(er) erkannt")
-        else:
-            st.warning("⚠️ MediaPipe nicht verfügbar — kein Count-Prefix")
         try:
             url = fal_client.generate_image(
-                state.captured_image_bytes, theme["prompt"], admin_settings.scene_quality
+                state.captured_image_bytes, theme["prompt"], admin_settings.scene_quality, state.num_people
             )
             state.result_image_url = url
         except Exception as e:

@@ -14,6 +14,7 @@ import threading
 class BoothState:
     phase: str = "idle"  # idle -> theme_selected -> countdown -> captured_ready -> processing -> result
     theme_id: str | None = None
+    num_people: int = 1
     capture_token: str = "none"
     captured_image_bytes: bytes | None = None
     result_image_url: str | None = None
@@ -24,6 +25,7 @@ class BoothState:
         with self.lock:
             self.phase = "idle"
             self.theme_id = None
+            self.num_people = 1
             self.capture_token = "none"
             self.captured_image_bytes = None
             self.result_image_url = None
