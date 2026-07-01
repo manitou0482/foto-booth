@@ -5,14 +5,17 @@ Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 
 Pipeline:
 1) Foto hochladen + Ausgabegröße aus Seitenverhältnis berechnen (÷16).
-2) FLUX.2 generiert neuen Hintergrund + Kostüm basierend auf @image1.
-3) FLUX.2-Ergebnis herunterladen.
-4) Lokales Face-Blending: Gesichter + Haare aus Originalfoto per MediaPipe
-   extrahieren, auf FLUX.2-Ausgabe warpen und mit weicher Ellipsenmaske einblenden.
-5) Geblendetes Bild erneut hochladen → finale URL zurückgeben.
+2) MediaPipe FaceMesh zählt Gesichter lokal → Count-Boostwords an Prompt-Anfang.
+3) FLUX.2 generiert neue Szene basierend auf @image1 + dynamischem Prompt.
+4) Lokales Face-Blending: Affiner Warp (cv2.getAffineTransform) +
+   99×99 Gaussian-Feathering — vollständig auf lokaler Festplatte abgeschlossen
+   bevor Schritt 5 startet.
+5) Geblendetes Bild von Festplatte lesen, hochladen → finale URL zurückgeben.
 """
 import io
+import os
 import random
+import tempfile
 
 import fal_client
 import requests
@@ -33,10 +36,22 @@ SCENE_ENDPOINTS = {
 
 MAX_DIMENSION = 1024
 
-# Padding um erkannte Gesichter für Haar-/Skin-Region
-_HAIR_PAD_RATIO = 1.0   # 100 % Gesichtshöhe nach oben (Haare)
+# Padding um die erkannte Gesichtsregion (Haar nach oben, Seiten)
+_HAIR_PAD_RATIO = 1.0   # 100 % Gesichtshöhe nach oben
 _SIDE_PAD_RATIO = 0.35  # 35 % Gesichtsbreite seitlich
-_BOT_PAD_RATIO  = 0.10  # 10 % Gesichtshöhe nach unten (Kinn)
+
+# Stabile Ankerpunkte für Affine-Transform:
+# 33 = linkes Auge außen, 263 = rechtes Auge außen, 152 = Kinn
+_AFFINE_IDX = [33, 263, 152]
+
+# Boostwords je Personenzahl — kommen an den absoluten Prompt-Anfang
+# (FLUX gewichtet frühe Tokens stärker → stärkste Ghost-Person-Unterdrückung)
+_COUNT_PREFIXES = {
+    1: "1person, solo, alone, single subject, single occupant, ",
+    2: "2people, duo, two individuals, side by side, exactly two people, ",
+    3: "3people, trio, exactly three people, three individuals, ",
+    4: "4people, exactly four people, four individuals, ",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -78,110 +93,91 @@ def _bgr_to_bytes(image_bgr: np.ndarray, quality: int = 90) -> bytes:
 
 
 # ---------------------------------------------------------------------------
-# Gesichtserkennung
+# FaceMesh — Gesichtserkennung + Landmarken
 # ---------------------------------------------------------------------------
 
-def _detect_faces(image_bgr: np.ndarray) -> list[tuple[int, int, int, int]]:
-    """Gibt Liste von (x, y, w, h) für alle erkannten Gesichter zurück,
-    sortiert von links nach rechts. Gibt [] zurück wenn keine gefunden."""
+def _face_mesh_landmarks(image_bgr: np.ndarray, max_faces: int = 4) -> list:
+    """Gibt Liste von (468, 2) float32-Arrays zurück (Pixel-Koordinaten je Gesicht),
+    sortiert L→R nach Nasenspitze (Landmark 4). Gibt [] zurück wenn keine gefunden."""
     h, w = image_bgr.shape[:2]
     rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-    detector = mp.solutions.face_detection.FaceDetection(
-        model_selection=1, min_detection_confidence=0.4
-    )
-    with detector as det:
-        result = det.process(rgb)
-    if not result.detections:
+    with mp.solutions.face_mesh.FaceMesh(
+        max_num_faces=max_faces,
+        refine_landmarks=False,
+        min_detection_confidence=0.4,
+    ) as fm:
+        res = fm.process(rgb)
+    if not res.multi_face_landmarks:
         return []
     faces = []
-    for det_obj in result.detections:
-        bb = det_obj.location_data.relative_bounding_box
-        x = max(0, int(bb.xmin * w))
-        y = max(0, int(bb.ymin * h))
-        fw = min(int(bb.width * w), w - x)
-        fh = min(int(bb.height * h), h - y)
-        if fw > 10 and fh > 10:
-            faces.append((x, y, fw, fh))
-    faces.sort(key=lambda f: f[0])
+    for fl in res.multi_face_landmarks:
+        pts = np.array(
+            [(lm.x * w, lm.y * h) for lm in fl.landmark],
+            dtype=np.float32,
+        )
+        faces.append(pts)
+    faces.sort(key=lambda pts: pts[4, 0])  # L→R nach Nasenspitze
     return faces
 
 
-# ---------------------------------------------------------------------------
-# Weiche Ellipsenmaske
-# ---------------------------------------------------------------------------
-
-def _soft_ellipse_mask(height: int, width: int) -> np.ndarray:
-    """Float32-Maske (H, W, 1) mit weicher Ellipse, Gaußscher Randunschärfe."""
-    mask = np.zeros((height, width), dtype=np.float32)
-    cy, cx = height // 2, width // 2
-    cv2.ellipse(mask, (cx, cy), (width // 2, height // 2), 0, 0, 360, 1.0, -1)
-    blur_r = max(3, min(width, height) // 8)
-    if blur_r % 2 == 0:
-        blur_r += 1
-    mask = cv2.GaussianBlur(mask, (blur_r, blur_r), 0)
-    return mask[:, :, np.newaxis]
+def _count_prefix(n: int) -> str:
+    return _COUNT_PREFIXES.get(n, f"{n}people, exactly {n} people, ")
 
 
 # ---------------------------------------------------------------------------
-# Face-Blending
+# Lokales Face-Blending (Affiner Warp + 99×99 Gaussian-Feathering)
 # ---------------------------------------------------------------------------
 
-def _blend_faces(original_bgr: np.ndarray, flux_bgr: np.ndarray) -> np.ndarray:
-    """Extrahiert Gesichter+Haare aus original_bgr, warpt sie auf die
-    entsprechenden Gesichtspositionen in flux_bgr und blendet sie ein.
+def _blend_faces(
+    original_bgr: np.ndarray,
+    flux_bgr: np.ndarray,
+    orig_lms: list,
+) -> np.ndarray:
+    """Warpt Originalgesichter + Haare auf die FLUX-Ausgabe via Affin-Transform.
+    orig_lms ist gecacht aus Schritt 2 — FaceMesh läuft hier NUR auf flux_bgr.
     Graceful fallback: gibt flux_bgr unverändert zurück wenn Erkennung scheitert."""
-    orig_h, orig_w = original_bgr.shape[:2]
+    flux_lms = _face_mesh_landmarks(flux_bgr)
+
+    if not flux_lms or len(orig_lms) != len(flux_lms):
+        return flux_bgr
+
     flux_h, flux_w = flux_bgr.shape[:2]
+    result = flux_bgr.copy()
 
-    orig_faces = _detect_faces(original_bgr)
-    flux_faces = _detect_faces(flux_bgr)
+    for orig_lm, flux_lm in zip(orig_lms, flux_lms):
+        # Affine Transform: 3 stabile Ankerpunkte (Augen außen + Kinn)
+        src_pts = orig_lm[_AFFINE_IDX].astype(np.float32)
+        dst_pts = flux_lm[_AFFINE_IDX].astype(np.float32)
+        M = cv2.getAffineTransform(src_pts, dst_pts)
 
-    if not orig_faces or not flux_faces:
-        return flux_bgr
+        # Original-Bild affin auf FLUX-Ausgabegröße warpen
+        warped = cv2.warpAffine(
+            original_bgr, M, (flux_w, flux_h), flags=cv2.INTER_LANCZOS4
+        )
 
-    # Gleiche Anzahl Gesichter prüfen – sonst lieber unberührt lassen
-    if len(orig_faces) != len(flux_faces):
-        return flux_bgr
+        # Gesichts-Bounding-Box aus FLUX-Landmarken + Haar-/Seiten-Padding
+        fx, fy = flux_lm[:, 0], flux_lm[:, 1]
+        fw = int(fx.max() - fx.min())
+        fh = int(fy.max() - fy.min())
+        cx = int((fx.min() + fx.max()) / 2)
+        cy = int(fy.min() + fh * 0.35)          # leicht nach oben: Haare einschließen
+        rx = fw // 2 + int(fw * _SIDE_PAD_RATIO)
+        ry = fh // 2 + int(fh * _HAIR_PAD_RATIO)
 
-    result = flux_bgr.copy().astype(np.float32)
+        # Ellipsenmaske in Bildgröße + 99×99 Gaussian-Feathering für weiches Blending
+        mask = np.zeros((flux_h, flux_w), dtype=np.float32)
+        cv2.ellipse(mask, (cx, cy), (rx, ry), 0, 0, 360, 1.0, -1)
+        mask = cv2.GaussianBlur(mask, (99, 99), 0)
+        mask = mask[:, :, np.newaxis]            # (H, W, 1) für Broadcasting
 
-    for (ox, oy, ow, oh), (fx, fy, fw, fh) in zip(orig_faces, flux_faces):
-        # Region um Gesicht herum (Haare nach oben, Seiten, Kinn)
-        hair_pad = int(oh * _HAIR_PAD_RATIO)
-        side_pad = int(ow * _SIDE_PAD_RATIO)
-        bot_pad  = int(oh * _BOT_PAD_RATIO)
+        # Alpha-Blend: Original-Gesicht × Maske + FLUX × (1 – Maske)
+        result = np.clip(
+            warped.astype(np.float32) * mask
+            + result.astype(np.float32) * (1.0 - mask),
+            0, 255,
+        ).astype(np.uint8)
 
-        # Original-Ausschnitt (mit Padding, geclampt auf Bildgrenzen)
-        o_x1 = max(0, ox - side_pad)
-        o_y1 = max(0, oy - hair_pad)
-        o_x2 = min(orig_w, ox + ow + side_pad)
-        o_y2 = min(orig_h, oy + oh + bot_pad)
-        orig_patch = original_bgr[o_y1:o_y2, o_x1:o_x2]
-
-        # FLUX-Zielregion (gleiche Padding-Verhältnisse, geclampt)
-        f_x1 = max(0, fx - int(fw * _SIDE_PAD_RATIO))
-        f_y1 = max(0, fy - int(fh * _HAIR_PAD_RATIO))
-        f_x2 = min(flux_w, fx + fw + int(fw * _SIDE_PAD_RATIO))
-        f_y2 = min(flux_h, fy + fh + int(fh * _BOT_PAD_RATIO))
-
-        target_w = f_x2 - f_x1
-        target_h = f_y2 - f_y1
-
-        if target_w < 4 or target_h < 4 or orig_patch.size == 0:
-            continue
-
-        # Patch auf Zielgröße skalieren
-        warped = cv2.resize(orig_patch, (target_w, target_h), interpolation=cv2.INTER_LANCZOS4)
-
-        # Weiche Ellipsenmaske
-        mask = _soft_ellipse_mask(target_h, target_w)  # float32 (H,W,1)
-
-        flux_region = result[f_y1:f_y2, f_x1:f_x2].astype(np.float32)
-        warped_f    = warped.astype(np.float32)
-        blended     = warped_f * mask + flux_region * (1.0 - mask)
-        result[f_y1:f_y2, f_x1:f_x2] = blended
-
-    return np.clip(result, 0, 255).astype(np.uint8)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -225,21 +221,38 @@ STYLE_CLAUSE = (
 # ---------------------------------------------------------------------------
 
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
-    """Hybrid-Pipeline: FLUX.2 generiert Szene, lokales Blending erhält Gesichter."""
-    # 1. Hochladen + Aspect-Ratio-Lock
+    """5-Schritt Hybrid-Pipeline: FLUX.2 generiert Szene, lokales Blending erhält Gesichter."""
+
+    # ── Schritt 1: Upload + Aspect-Ratio-Lock ────────────────────────────────
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
     size = _output_size(image_bytes)
 
-    # 2. FLUX.2 Cloud-Generierung
+    # ── Schritt 2: Gesichter lokal zählen → Count-Prefix ─────────────────────
+    # FaceMesh läuft genau EINMAL auf dem Originalfoto. orig_lms wird gecacht
+    # und direkt an _blend_faces() übergeben — kein zweiter Durchlauf in Schritt 4.
+    count_prefix = ""
+    orig_lms: list = []
+    original_bgr = None
+    if _BLEND_AVAILABLE:
+        original_bgr = _bytes_to_bgr(resized_bytes)
+        orig_lms = _face_mesh_landmarks(original_bgr)
+        if orig_lms:
+            count_prefix = _count_prefix(len(orig_lms))
+
     full_prompt = (
-        FORMAT_CLAUSE
+        count_prefix          # ← GANZ VORNE: "1person, solo, alone, ..."
+        + FORMAT_CLAUSE
         + VISIBILITY_CLAUSE
         + FACE_CLAUSE
         + COUNT_CLAUSE
         + STYLE_CLAUSE
         + prompt
     )
+
+    # ── Schritt 3: FLUX.2 Cloud-Generierung + Download ───────────────────────
+    # fal-ai/flux-2/edit hat kein image_guidance_scale — Bildreferenz ist
+    # architekturell eingebaut und nicht per Parameter steuerbar.
     scene_result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
@@ -249,31 +262,38 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
             "seed": random.randint(1, 99999999),
         },
     )
-    flux_url = scene_result["images"][0]["url"]
-
-    # 3. FLUX-Ergebnis herunterladen
-    response = requests.get(flux_url, timeout=30)
+    response = requests.get(scene_result["images"][0]["url"], timeout=30)
     response.raise_for_status()
     flux_bytes = response.content
 
-    # 4. Lokales Face-Blending (nur wenn cv2/mediapipe verfügbar)
-    if _BLEND_AVAILABLE:
+    # ── Schritt 4: Lokales Face-Blending (vollständig auf Festplatte) ─────────
+    # orig_lms aus Schritt 2 gecacht — FaceMesh läuft hier nur noch auf flux_bgr.
+    if _BLEND_AVAILABLE and orig_lms and original_bgr is not None:
         try:
-            original_bgr = _bytes_to_bgr(resized_bytes)
-            flux_bgr     = _bytes_to_bgr(flux_bytes)
-
-            # Auf gleiche Größe bringen falls nötig
+            flux_bgr = _bytes_to_bgr(flux_bytes)
             if original_bgr.shape[:2] != flux_bgr.shape[:2]:
-                flux_h, flux_w = flux_bgr.shape[:2]
-                original_bgr = cv2.resize(original_bgr, (flux_w, flux_h), interpolation=cv2.INTER_LANCZOS4)
-
-            blended_bgr   = _blend_faces(original_bgr, flux_bgr)
+                fh, fw = flux_bgr.shape[:2]
+                original_bgr = cv2.resize(
+                    original_bgr, (fw, fh), interpolation=cv2.INTER_LANCZOS4
+                )
+            blended_bgr = _blend_faces(original_bgr, flux_bgr, orig_lms)
             blended_bytes = _bgr_to_bytes(blended_bgr)
         except Exception:
             blended_bytes = flux_bytes
     else:
         blended_bytes = flux_bytes
 
-    # 5. Geblendetes Bild hochladen + URL zurückgeben
-    final_url = fal_client.upload(blended_bytes, "image/jpeg")
+    # Geblendetes Bild auf lokale Festplatte schreiben.
+    # Schritt 5 startet erst wenn tmp.write() vollständig abgeschlossen ist.
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+        tmp.write(blended_bytes)
+        tmp_path = tmp.name
+
+    # ── Schritt 5: Re-Upload von Festplatte → finale URL ─────────────────────
+    try:
+        with open(tmp_path, "rb") as f:
+            final_url = fal_client.upload(f.read(), "image/jpeg")
+    finally:
+        os.unlink(tmp_path)  # Temp-Datei aufräumen, auch bei Upload-Fehler
+
     return final_url
