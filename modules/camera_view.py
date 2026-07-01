@@ -77,10 +77,16 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
             ui_components.render_loading_spinner()
         theme = next(t for t in themes if t["id"] == state.theme_id)
         try:
-            result_url = fal_client.generate_image(
+            image_url, scene_url = fal_client.generate_image(
                 state.captured_image_bytes, theme["prompt"], admin_settings.scene_quality, state.num_people
             )
-            state.result_image_url = result_url
+            try:
+                final_url = fal_client.face_swap(image_url, scene_url)
+                state.result_image_url = final_url
+                state.face_swap_status = "✅ Face-Swap erfolgreich"
+            except Exception as swap_err:
+                state.result_image_url = scene_url
+                state.face_swap_status = f"⚠️ Face-Swap fehlgeschlagen: {swap_err}"
         except Exception as e:
             state.error = str(e)
         placeholder.empty()
@@ -91,6 +97,8 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
         if state.error:
             st.error(f"Fehler bei der KI-Generierung: {state.error}")
         else:
+            if state.face_swap_status:
+                st.info(state.face_swap_status)
             ui_components.render_result(state.result_image_url, state.captured_image_bytes)
 
 

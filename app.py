@@ -50,6 +50,9 @@ else:
     )
     st.stop()
 
+if "REPLICATE_KEY" in st.secrets:
+    os.environ["REPLICATE_API_TOKEN"] = st.secrets["REPLICATE_KEY"]
+
 themes = load_themes()
 admin_settings = get_admin_settings()
 

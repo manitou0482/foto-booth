@@ -4,3 +4,4 @@ qrcode[pil]
 Pillow
 streamlit-autorefresh
 requests
+replicate

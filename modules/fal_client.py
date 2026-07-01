@@ -1,18 +1,21 @@
-"""Pipeline: Foto → FLUX PuLID (FLUX.1 + Gesichtsidentität) → finale URL.
+"""Pipeline: Foto → FLUX.2 Szene → Replicate Face-Swap → finale URL.
 
-Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
-(siehe app.py) und niemals im Code hinterlegt.
+API-Keys werden ausschließlich über st.secrets gelesen (siehe app.py)
+und niemals im Code hinterlegt.
 """
 import io
 import random
 
 import fal_client
+import replicate
 from PIL import Image
 
 SCENE_ENDPOINTS = {
-    "dev": "fal-ai/flux-pulid",
-    "pro": "fal-ai/flux-pulid",
+    "dev": "fal-ai/flux-2/edit",
+    "pro": "fal-ai/flux-2-pro/edit",
 }
+
+FACESWAP_MODEL = "mertguvencli/face-swap-with-indexes:518f2116425c40acb5c234031c55daf843c1357eff784370fe9489e57b65c150"
 
 MAX_DIMENSION = 1024
 
@@ -44,8 +47,24 @@ def _output_size(image_bytes: bytes) -> dict:
     return {"width": max(out_w, 16), "height": max(out_h, 16)}
 
 
-def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_people: int = 1) -> str:
-    """Gibt result_url zurück: FLUX.2-generiertes Themenbild."""
+def face_swap(source_url: str, target_url: str) -> str:
+    """Überträgt alle Gesichter aus source_url auf target_url via Replicate.
+    Wirft Exception wenn der Aufruf fehlschlägt."""
+    output = replicate.run(
+        FACESWAP_MODEL,
+        input={
+            "execution_type": "face_index",
+            "source_face_image": source_url,
+            "destination_image": target_url,
+        },
+    )
+    return output.url
+
+
+def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_people: int = 1) -> tuple[str, str]:
+    """Gibt (image_url, scene_url) zurück.
+    image_url = hochgeladenes Originalfoto (für Face-Swap),
+    scene_url = FLUX.2-Ergebnis."""
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")
     size = _output_size(image_bytes)
@@ -59,10 +78,11 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
     result = fal_client.run(
         SCENE_ENDPOINTS[quality],
         arguments={
-            "reference_image_url": image_url,
             "prompt": full_prompt,
+            "image_urls": [image_url],
             "image_size": size,
             "seed": random.randint(1, 99999999),
         },
     )
-    return result["images"][0]["url"]
+    scene_url = result["images"][0]["url"]
+    return image_url, scene_url
