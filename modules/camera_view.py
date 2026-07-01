@@ -76,10 +76,13 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
         with placeholder:
             ui_components.render_loading_spinner()
         theme = next(t for t in themes if t["id"] == state.theme_id)
+        dbg = st.empty()
         try:
+            dbg.info("⏳ Schritt 1: Foto wird hochgeladen + FLUX.2 startet ...")
             image_url, scene_url = fal_client.generate_image(
                 state.captured_image_bytes, theme["prompt"], admin_settings.scene_quality, state.num_people
             )
+            dbg.info("⏳ Schritt 2: FLUX.2 fertig — Face-Swap startet ...")
             try:
                 final_url = fal_client.face_swap(image_url, scene_url)
                 state.result_image_url = final_url
@@ -89,6 +92,7 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
                 state.face_swap_status = f"⚠️ Face-Swap fehlgeschlagen: {swap_err}"
         except Exception as e:
             state.error = str(e)
+        dbg.empty()
         placeholder.empty()
         state.phase = "result"
         st.rerun()
