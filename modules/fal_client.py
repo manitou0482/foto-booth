@@ -1,19 +1,16 @@
-"""4-Schritt Hybrid-Pipeline: FLUX.2 Cloud-Generierung + lokales Face-Blending.
+"""Hybrid-Pipeline: FLUX.2 Cloud-Generierung + lokales Face-Blending.
 
 Der API-Key wird ausschließlich über st.secrets["FAL_KEY"] gelesen
 (siehe app.py) und niemals im Code hinterlegt.
 
 Pipeline:
-1)  Foto hochladen + Ausgabegröße aus Seitenverhältnis berechnen (÷16).
-2)  MediaPipe FaceMesh zählt Gesichter lokal → Count-Boostwords an Prompt-Anfang.
-    Läuft nur wenn cv2/mediapipe installiert sind (_BLEND_AVAILABLE = True).
-3)  FLUX.2 generiert neue Szene aus dem Originalfoto + dynamischem Prompt.
-4)  Lokales Face-Blending: Affiner Warp (cv2.getAffineTransform) aus Originalfoto
-    + 99×99 Gaussian-Feathering → Gesichter/Haare/Tattoos aus Original erhalten.
-    Bei Anzahl-Mismatch (FLUX generiert mehr Personen als Original) werden die
-    ersten min(orig, flux) Gesichter geblendet — kein stilles Überspringen mehr.
-    Vollständig auf lokaler Festplatte abgeschlossen bevor Schritt 5 startet.
-5)  Geblendetes Bild von Festplatte lesen, hochladen → finale URL zurückgeben.
+1) Foto hochladen + Ausgabegröße aus Seitenverhältnis berechnen (÷16).
+2) MediaPipe FaceMesh zählt Gesichter lokal → Count-Boostwords an Prompt-Anfang.
+3) FLUX.2 generiert neue Szene basierend auf @image1 + dynamischem Prompt.
+4) Lokales Face-Blending: Affiner Warp (cv2.getAffineTransform) +
+   99×99 Gaussian-Feathering — vollständig auf lokaler Festplatte abgeschlossen
+   bevor Schritt 5 startet.
+5) Geblendetes Bild von Festplatte lesen, hochladen → finale URL zurückgeben.
 """
 import io
 import os
@@ -48,7 +45,7 @@ _SIDE_PAD_RATIO = 0.35  # 35 % Gesichtsbreite seitlich
 _AFFINE_IDX = [33, 263, 152]
 
 # Boostwords je Personenzahl — kommen an den absoluten Prompt-Anfang
-# (FLUX gewichtet frühe Tokens stärker → stärkste Count-Unterdrückung)
+# (FLUX gewichtet frühe Tokens stärker → stärkste Ghost-Person-Unterdrückung)
 _COUNT_PREFIXES = {
     1: "1person, solo, alone, single subject, single occupant, ",
     2: "2people, duo, two individuals, side by side, exactly two people, ",
@@ -70,7 +67,8 @@ def _resize_for_upload(image_bytes: bytes) -> bytes:
 
 
 def _output_size(image_bytes: bytes) -> dict:
-    """Ausgabegröße passend zum Eingabe-Seitenverhältnis, immer ÷16."""
+    """Ausgabegröße passend zum Eingabe-Seitenverhältnis, immer ÷16.
+    Verhindert Ghostpersonen durch Kompositions-Neuerfindung bei falschem Ratio."""
     img = Image.open(io.BytesIO(image_bytes))
     w, h = img.size
     if w >= h:
@@ -136,19 +134,16 @@ def _blend_faces(
     orig_lms: list,
 ) -> np.ndarray:
     """Warpt Originalgesichter + Haare auf die FLUX-Ausgabe via Affin-Transform.
-
     orig_lms ist gecacht aus Schritt 2 — FaceMesh läuft hier NUR auf flux_bgr.
-    Bei Anzahl-Mismatch (FLUX mehr Personen als Original) werden die ersten
-    min(orig, flux) Gesichtspaare geblendet (L→R sortiert). Kein stilles
-    Überspringen mehr — gibt flux_bgr unverändert nur zurück wenn flux_lms leer."""
+    Graceful fallback: gibt flux_bgr unverändert zurück wenn Erkennung scheitert."""
     flux_lms = _face_mesh_landmarks(flux_bgr)
-    if not flux_lms:
+
+    if not flux_lms or len(orig_lms) != len(flux_lms):
         return flux_bgr
 
     flux_h, flux_w = flux_bgr.shape[:2]
     result = flux_bgr.copy()
 
-    # Blend so viele Paare wie möglich (L→R sortiert, min von beiden Listen)
     for orig_lm, flux_lm in zip(orig_lms, flux_lms):
         # Affine Transform: 3 stabile Ankerpunkte (Augen außen + Kinn)
         src_pts = orig_lm[_AFFINE_IDX].astype(np.float32)
@@ -226,7 +221,7 @@ STYLE_CLAUSE = (
 # ---------------------------------------------------------------------------
 
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
-    """4-Schritt Hybrid-Pipeline: FLUX.2 generiert Szene, lokales Blending erhält Gesichter."""
+    """5-Schritt Hybrid-Pipeline: FLUX.2 generiert Szene, lokales Blending erhält Gesichter."""
 
     # ── Schritt 1: Upload + Aspect-Ratio-Lock ────────────────────────────────
     resized_bytes = _resize_for_upload(image_bytes)
@@ -236,8 +231,6 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
     # ── Schritt 2: Gesichter lokal zählen → Count-Prefix ─────────────────────
     # FaceMesh läuft genau EINMAL auf dem Originalfoto. orig_lms wird gecacht
     # und direkt an _blend_faces() übergeben — kein zweiter Durchlauf in Schritt 4.
-    # Wenn _BLEND_AVAILABLE = False (cv2/mediapipe nicht installiert): kein Blending,
-    # kein Count-Prefix — FLUX.2 bekommt keinen Personenzahl-Hinweis.
     count_prefix = ""
     orig_lms: list = []
     original_bgr = None
@@ -275,7 +268,6 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str
 
     # ── Schritt 4: Lokales Face-Blending (vollständig auf Festplatte) ─────────
     # orig_lms aus Schritt 2 gecacht — FaceMesh läuft hier nur noch auf flux_bgr.
-    # Bei Anzahl-Mismatch: blend min(orig, flux) Paare statt komplett zu überspringen.
     if _BLEND_AVAILABLE and orig_lms and original_bgr is not None:
         try:
             flux_bgr = _bytes_to_bgr(flux_bytes)
