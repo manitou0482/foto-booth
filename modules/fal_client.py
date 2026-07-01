@@ -70,6 +70,12 @@ def _count_faces(image_bytes: bytes) -> int:
     return len(res.multi_face_landmarks) if res.multi_face_landmarks else 0
 
 
+def debug_count(image_bytes: bytes) -> dict:
+    """Gibt Debug-Info zurück: ob MediaPipe verfügbar ist und wie viele Gesichter erkannt wurden."""
+    n = _count_faces(image_bytes) if _COUNT_AVAILABLE else -1
+    return {"available": _COUNT_AVAILABLE, "faces": n}
+
+
 def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev") -> str:
     resized_bytes = _resize_for_upload(image_bytes)
     image_url = fal_client.upload(resized_bytes, "image/jpeg")

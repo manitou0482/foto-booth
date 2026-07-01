@@ -70,6 +70,11 @@ def _run_capture_flow(state, themes, admin_settings, waiting_message: str):
         with placeholder:
             ui_components.render_loading_spinner()
         theme = next(t for t in themes if t["id"] == state.theme_id)
+        dbg = fal_client.debug_count(state.captured_image_bytes)
+        if dbg["available"]:
+            st.info(f"🔍 MediaPipe aktiv — {dbg['faces']} Gesicht(er) erkannt")
+        else:
+            st.warning("⚠️ MediaPipe nicht verfügbar — kein Count-Prefix")
         try:
             url = fal_client.generate_image(
                 state.captured_image_bytes, theme["prompt"], admin_settings.scene_quality
