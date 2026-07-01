@@ -201,8 +201,10 @@ FACE_CLAUSE = (
 )
 
 COUNT_CLAUSE = (
-    "Include only the people who are clearly in the foreground and facing the camera "
-    "as seen in @image1. Do not add extra people or background bystanders. "
+    "CRITICAL — person count: The output must contain EXACTLY the same number of people "
+    "as the foreground subjects in @image1 — not one more, not one less. "
+    "Count the foreground people in @image1 carefully and reproduce that exact number. "
+    "Ignore all background people in @image1. Do not invent additional characters. "
 )
 
 VISIBILITY_CLAUSE = (
