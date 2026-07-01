@@ -14,7 +14,7 @@ SCENE_ENDPOINTS = {
     "pro": "fal-ai/flux-2-pro/edit",
 }
 
-FACESWAP_ENDPOINT = "easel-ai/advanced-face-swap"
+FACESWAP_ENDPOINT = "half-moon-ai/ai-face-swap/faceswapimagemulti"
 
 MAX_DIMENSION = 1024
 
@@ -51,10 +51,8 @@ def face_swap(source_url: str, target_url: str) -> str:
     result = fal_client.run(
         FACESWAP_ENDPOINT,
         arguments={
-            "face_image_0": {"url": source_url},
-            "gender_0": "non-binary",
-            "target_image": {"url": target_url},
-            "workflow_type": "target_hair",
+            "source_face_url_1": source_url,
+            "target_image_url": target_url,
         },
     )
     return result["image"]["url"]
