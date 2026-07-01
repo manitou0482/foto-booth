@@ -2,140 +2,140 @@
   {
     "id": "urzeit_dschungel",
     "label": "🦖 Urzeit-Dschungel",
-    "prompt": "The people from @image1 in a prehistoric jungle near a dinosaur — for a man: explorer shirt & cargo pants; for a woman: practical adventurer shorts & jacket. Lush prehistoric jungle with ancient flora.",
+    "prompt": "in a prehistoric jungle near a dinosaur — for a man: explorer shirt & cargo pants; for a woman: practical adventurer shorts & jacket. Lush prehistoric jungle with ancient flora.",
     "preview": "assets/previews/urzeit_dschungel.jpg",
     "short_label": "Dschungel"
   },
   {
     "id": "galaktische_odyssee",
     "label": "🚀 Galaktische Odyssee",
-    "prompt": "The people from @image1 in outer space — floating near a glowing nebula or inside a spaceship cockpit — for a man: NASA-style spacesuit or sci-fi captain's uniform; for a woman: sleek sci-fi bodysuit or female astronaut suit. Stars and colorful nebulae in the background.",
+    "prompt": "in outer space — floating near a glowing nebula or inside a spaceship cockpit — for a man: NASA-style spacesuit or sci-fi captain's uniform; for a woman: sleek sci-fi bodysuit or female astronaut suit. Stars and colorful nebulae in the background.",
     "preview": "assets/previews/galaktische_odyssee.jpg",
     "short_label": "Galaxie"
   },
   {
     "id": "wilder_westen",
     "label": "🤠 Wilder Westen",
-    "prompt": "The people from @image1 in an American Wild West setting — inside a saloon or on a dusty main street — for a man: cowboy duster coat or sheriff's uniform; for a woman: cowgirl riding outfit or frontier saloon dress. Warm golden western atmosphere.",
+    "prompt": "in an American Wild West setting — inside a saloon or on a dusty main street — for a man: cowboy duster coat or sheriff's uniform; for a woman: cowgirl riding outfit or frontier saloon dress. Warm golden western atmosphere.",
     "preview": "assets/previews/wilder_westen.jpg",
     "short_label": "Wildwest"
   },
   {
     "id": "ritter_burgen",
     "label": "⚔️ Ritter & Burgen",
-    "prompt": "The people from @image1 in a medieval setting — on a castle wall or in a great hall — for a man: knight armor or nobleman's tournament tunic; for a woman: elegant noblewoman's gown or lady knight armor. Stone walls and torchlight in the background.",
+    "prompt": "in a medieval setting — on a castle wall or in a great hall — for a man: knight armor or nobleman's tournament tunic; for a woman: elegant noblewoman's gown or lady knight armor. Stone walls and torchlight in the background.",
     "preview": "assets/previews/ritter_burgen.jpg",
     "short_label": "Ritter"
   },
   {
     "id": "pop_art_comic",
     "label": "🎨 Pop-Art Comic",
-    "prompt": "All the people from @image1 as a comic book illustration — pop-art style with bold ink outlines, vibrant halftone dot shading, saturated colors and retro explosive text shapes.",
+    "prompt": "as a comic book illustration — pop-art style with bold ink outlines, vibrant halftone dot shading, saturated colors and retro explosive text shapes.",
     "preview": "assets/previews/pop_art_comic.jpg",
     "short_label": "Pop Art"
   },
   {
     "id": "retro_80er",
     "label": "🪩 80er-Jahre Retro",
-    "prompt": "The people from @image1 at a 1980s neon party — dancing under a disco ball or roller-skating — for a man: neon windbreaker & retro jeans; for a woman: leg warmers & off-shoulder neon top. Colorful retro party atmosphere.",
+    "prompt": "at a 1980s neon party — dancing under a disco ball or roller-skating — for a man: neon windbreaker & retro jeans; for a woman: leg warmers & off-shoulder neon top. Colorful retro party atmosphere.",
     "preview": "assets/previews/retro_80er.jpg",
     "short_label": "80er"
   },
   {
     "id": "cyberpunk_2077",
     "label": "🕶️ Cyberpunk 2077",
-    "prompt": "The people from @image1 in a futuristic cyberpunk city at night — on a rain-slicked street or in a neon-lit bar — for a man: cybernetic jacket with glowing LED lines; for a woman: cyber bodysuit with LED accents. Neon signs and rain-reflected lights.",
+    "prompt": "in a futuristic cyberpunk city at night — on a rain-slicked street or in a neon-lit bar — for a man: cybernetic jacket with glowing LED lines; for a woman: cyber bodysuit with LED accents. Neon signs and rain-reflected lights.",
     "preview": "assets/previews/cyberpunk_2077.jpg",
     "short_label": "Cyberpunk"
   },
   {
     "id": "piraten_abenteuer",
     "label": "🏝️ Piraten-Abenteuer",
-    "prompt": "The people from @image1 as pirates — on the deck of a galleon or on a tropical beach with treasure — for a man: captain's coat & tricorn hat; for a woman: swashbuckling pirate dress. Blue ocean and tropical setting.",
+    "prompt": "as pirates — on the deck of a galleon or on a tropical beach with treasure — for a man: captain's coat & tricorn hat; for a woman: swashbuckling pirate dress. Blue ocean and tropical setting.",
     "preview": "assets/previews/piraten_abenteuer.jpg",
     "short_label": "Piraten"
   },
   {
     "id": "unterwasser_atlantis",
     "label": "🔱 Unterwasser-Atlantis",
-    "prompt": "The people from @image1 exploring underwater Atlantis — among ancient stone columns and colorful coral reefs — for a man: Atlantean warrior armor; for a woman: mermaid queen gown with flowing fins. Soft blue underwater light with floating bubbles.",
+    "prompt": "exploring underwater Atlantis — among ancient stone columns and colorful coral reefs — for a man: Atlantean warrior armor; for a woman: mermaid queen gown with flowing fins. Soft blue underwater light with floating bubbles.",
     "preview": "assets/previews/unterwasser_atlantis.jpg",
     "short_label": "Atlantis"
   },
   {
     "id": "vampir_schloss",
     "label": "🧛 Vampir-Schloss",
-    "prompt": "The people from @image1 as elegant vampires in a gothic castle — on a grand staircase or by a moonlit window — for a man: velvet cape & gothic coat; for a woman: gothic ball gown. Candlelit gothic interior.",
+    "prompt": "as elegant vampires in a gothic castle — on a grand staircase or by a moonlit window — for a man: velvet cape & gothic coat; for a woman: gothic ball gown. Candlelit gothic interior.",
     "preview": "assets/previews/vampir_schloss.jpg",
     "short_label": "Vampir"
   },
   {
     "id": "film_noir_detektiv",
     "label": "🕵️‍♂️ Film Noir Detektiv",
-    "prompt": "The people from @image1 in a 1940s film noir scene — under a streetlamp or in a detective's office — for a man: trench coat & fedora; for a woman: 1940s detective dress or femme fatale evening gown. Black and white photography.",
+    "prompt": "in a 1940s film noir scene — under a streetlamp or in a detective's office — for a man: trench coat & fedora; for a woman: 1940s detective dress or femme fatale evening gown. Black and white photography.",
     "preview": "assets/previews/film_noir_detektiv.jpg",
     "short_label": "Film Noir"
   },
   {
     "id": "zombie_apokalypse",
     "label": "🧟 Zombie-Apokalypse",
-    "prompt": "The people from @image1 in a post-apocalyptic setting — in an abandoned building or on a ruined city street — for a man: tactical military gear; for a woman: practical survivor jacket & pants. Gritty desaturated atmosphere.",
+    "prompt": "in a post-apocalyptic setting — in an abandoned building or on a ruined city street — for a man: tactical military gear; for a woman: practical survivor jacket & pants. Gritty desaturated atmosphere.",
     "preview": "assets/previews/zombie_apokalypse.jpg",
     "short_label": "Zombie"
   },
   {
     "id": "hollywood_roter_teppich",
     "label": "👑 Hollywood Roter Teppich",
-    "prompt": "The people from @image1 at a Hollywood movie premiere — walking the red carpet or holding a golden award trophy — for a man: sharp tuxedo; for a woman: stunning evening gown. Bright flashbulbs and glamorous red carpet.",
+    "prompt": "at a Hollywood movie premiere — walking the red carpet or holding a golden award trophy — for a man: sharp tuxedo; for a woman: stunning evening gown. Bright flashbulbs and glamorous red carpet.",
     "preview": "assets/previews/hollywood_roter_teppich.jpg",
     "short_label": "Red Carpet"
   },
   {
     "id": "formel1_rennfahrer",
     "label": "🏎️ Formel 1 Rennfahrer",
-    "prompt": "The people from @image1 as professional racing drivers — holding a helmet next to a supercar or celebrating on a podium with champagne, wearing a racing jumpsuit with sponsor patches. Colorful racetrack environment.",
+    "prompt": "as professional racing drivers — holding a helmet next to a supercar or celebrating on a podium with champagne, wearing a racing jumpsuit with sponsor patches. Colorful racetrack environment.",
     "preview": "assets/previews/formel1_rennfahrer.jpg",
     "short_label": "Formel 1"
   },
   {
     "id": "zauberer_akademie",
     "label": "🧙‍♂️ Zauberer-Akademie",
-    "prompt": "The people from @image1 as wizards — casting a glowing spell with a wand or in a grand library with flying candles — for a man: dark wizard robes or sorcerer's ceremonial robe; for a woman: witch's flowing robes or sorceress gown. Warm magical candlelight with floating sparks.",
+    "prompt": "as wizards — casting a glowing spell with a wand or in a grand library with flying candles — for a man: dark wizard robes or sorcerer's ceremonial robe; for a woman: witch's flowing robes or sorceress gown. Warm magical candlelight with floating sparks.",
     "preview": "assets/previews/zauberer_akademie.jpg",
     "short_label": "Zauberer"
   },
   {
     "id": "vintage_strand_50er",
     "label": "🏖️ 1950s Vintage Strand",
-    "prompt": "The people from @image1 on a sunny 1950s California beach — holding a vintage surfboard or next to a classic retro camper van — for a man: swim trunks & Hawaiian shirt; for a woman: one-piece swimsuit or retro bikini. Warm sunshine and vintage Polaroid color mood.",
+    "prompt": "on a sunny 1950s California beach — holding a vintage surfboard or next to a classic retro camper van — for a man: swim trunks & Hawaiian shirt; for a woman: one-piece swimsuit or retro bikini. Warm sunshine and vintage Polaroid color mood.",
     "preview": "assets/previews/vintage_strand_50er.jpg",
     "short_label": "Strand 50er"
   },
   {
     "id": "samurai_legende",
     "label": "🏯 Samurai-Legende",
-    "prompt": "The people from @image1 in historical Japan — in a zen garden with cherry blossoms or in front of a traditional pagoda — for a man: samurai armor or ronin's hakama; for a woman: flowing furisode kimono or onna-musha warrior armor. Soft mist and cherry blossom petals.",
+    "prompt": "in historical Japan — in a zen garden with cherry blossoms or in front of a traditional pagoda — for a man: samurai armor or ronin's hakama; for a woman: flowing furisode kimono or onna-musha warrior armor. Soft mist and cherry blossom petals.",
     "preview": "assets/previews/samurai_legende.jpg",
     "short_label": "Samurai"
   },
   {
     "id": "pixar_3d_animation",
     "label": "🧸 3D Pixar Animation",
-    "prompt": "All the people from @image1 as 3D animated Pixar-style characters — interacting with a cute talking animal or exploring a whimsical fantasy village. Vibrant saturated colors, soft clay-like lighting.",
+    "prompt": "as 3D animated Pixar-style characters — interacting with a cute talking animal or exploring a whimsical fantasy village. Vibrant saturated colors, soft clay-like lighting.",
     "preview": "assets/previews/pixar_3d_animation.jpg",
     "short_label": "Pixar"
   },
   {
     "id": "rockstar_arena",
     "label": "🎸 Rock-Star Arena",
-    "prompt": "The people from @image1 as rock stars on stage — singing into a microphone or playing electric guitar — for a man: leather jacket & ripped jeans; for a woman: rock diva stage dress or leather jacket & fishnet outfit. Colorful stage lighting and fog.",
+    "prompt": "as rock stars on stage — singing into a microphone or playing electric guitar — for a man: leather jacket & ripped jeans; for a woman: rock diva stage dress or leather jacket & fishnet outfit. Colorful stage lighting and fog.",
     "preview": "assets/previews/rockstar_arena.jpg",
     "short_label": "Rockstar"
   },
   {
     "id": "steampunk_tueftler",
     "label": "🧸 Steampunk-Tüftler",
-    "prompt": "The people from @image1 as Victorian steampunk inventors — operating a brass clockwork machine or holding a copper gadget — for a man: inventor's coat with brass gear wheels; for a woman: steampunk corset dress with brass accessories. Warm industrial copper atmosphere with drifting smoke.",
+    "prompt": "as Victorian steampunk inventors — operating a brass clockwork machine or holding a copper gadget — for a man: inventor's coat with brass gear wheels; for a woman: steampunk corset dress with brass accessories. Warm industrial copper atmosphere with drifting smoke.",
     "preview": "assets/previews/steampunk_tueftler.jpg",
     "short_label": "Steampunk"
   }
