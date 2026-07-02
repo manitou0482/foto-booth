@@ -11,8 +11,8 @@ import replicate
 from PIL import Image
 
 SCENE_ENDPOINTS = {
-    "dev": "fal-ai/flux-2/edit",
-    "pro": "fal-ai/flux-2-pro/edit",
+    "dev": "fal-ai/flux-2/lora/edit",
+    "pro": "fal-ai/flux-2/lora/edit",
 }
 
 FACESWAP_MODEL = "ddvinh1/inswapper:25bdae46f2713138640b6e8c04dc4ca18625ce95b1863936b053eee42d9ba6db"
@@ -87,6 +87,7 @@ def generate_image(image_bytes: bytes, prompt: str, quality: str = "dev", num_pe
             "image_urls": [image_url],
             "image_size": size,
             "seed": random.randint(1, 99999999),
+            "acceleration": "high",
         },
     )
     scene_url = result["images"][0]["url"]
